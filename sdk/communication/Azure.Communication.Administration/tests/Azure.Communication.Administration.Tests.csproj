@@ -18,15 +18,11 @@
   <!-- Shared source from Azure.Core -->
   <ItemGroup>
     <Compile Include="$(AzureCoreSharedSources)ConnectionString.cs" Link="Shared\%(RecursiveDir)\%(Filename)%(Extension)" />
-    <Compile Include="..\..\Shared\src\CommunicationRecordedTestSanitizer.cs" Link="Shared\Communication\CommunicationRecordedTestSanitizer.cs" />
-
+    <Compile Include="..\..\Azure.Communication.Common\tests\CommunicationRecordedTestSanitizer.cs" Link="Shared\Communication\%(RecursiveDir)\%(Filename)%(Extension)" />
   </ItemGroup>
   <ItemGroup>
     <None Include="..\samples\README.md" Link="samples\README.md" />
     <None Include="..\samples\Sample1_CommunicationIdentityClient.md" Link="samples\Sample1_CommunicationIdentityClient.md" />
     <None Include="..\samples\Sample1_CommunicationIdentityClientAsync.md" Link="samples\Sample1_CommunicationIdentityClientAsync.md" />
-  </ItemGroup>
-  <ItemGroup>
-    <Folder Include="Shared\Communication\" />
   </ItemGroup>
 </Project>
