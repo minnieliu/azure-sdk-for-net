@@ -6,25 +6,23 @@
 #nullable disable
 
 using System;
+using System.Collections.Generic;
 using System.Text.Json;
 using Azure.Core;
 
 namespace Azure.Communication.Administration.Models
 {
-    public partial class AcquiredPhoneNumber
+    public partial class SearchResult
     {
-        internal static AcquiredPhoneNumber DeserializeAcquiredPhoneNumber(JsonElement element)
+        internal static SearchResult DeserializeSearchResult(JsonElement element)
         {
             Optional<string> id = default;
-            Optional<string> phoneNumber = default;
-            Optional<string> countryCode = default;
+            Optional<IReadOnlyList<string>> phoneNumbers = default;
             Optional<PhoneNumberType> numberType = default;
             Optional<AssignmentType> assignmentType = default;
-            Optional<DateTimeOffset> purchaseDate = default;
             Optional<Capabilities> capabilities = default;
-            Optional<string> callbackUrl = default;
-            Optional<string> applicationId = default;
             Optional<MonthlyRate> monthlyRate = default;
+            Optional<DateTimeOffset> searchExpiresBy = default;
             foreach (var property in element.EnumerateObject())
             {
                 if (property.NameEquals("id"))
@@ -32,14 +30,19 @@ namespace Azure.Communication.Administration.Models
                     id = property.Value.GetString();
                     continue;
                 }
-                if (property.NameEquals("phoneNumber"))
+                if (property.NameEquals("phoneNumbers"))
                 {
-                    phoneNumber = property.Value.GetString();
-                    continue;
-                }
-                if (property.NameEquals("countryCode"))
-                {
-                    countryCode = property.Value.GetString();
+                    if (property.Value.ValueKind == JsonValueKind.Null)
+                    {
+                        property.ThrowNonNullablePropertyIsNull();
+                        continue;
+                    }
+                    List<string> array = new List<string>();
+                    foreach (var item in property.Value.EnumerateArray())
+                    {
+                        array.Add(item.GetString());
+                    }
+                    phoneNumbers = array;
                     continue;
                 }
                 if (property.NameEquals("numberType"))
@@ -62,16 +65,6 @@ namespace Azure.Communication.Administration.Models
                     assignmentType = new AssignmentType(property.Value.GetString());
                     continue;
                 }
-                if (property.NameEquals("purchaseDate"))
-                {
-                    if (property.Value.ValueKind == JsonValueKind.Null)
-                    {
-                        property.ThrowNonNullablePropertyIsNull();
-                        continue;
-                    }
-                    purchaseDate = property.Value.GetDateTimeOffset("O");
-                    continue;
-                }
                 if (property.NameEquals("capabilities"))
                 {
                     if (property.Value.ValueKind == JsonValueKind.Null)
@@ -80,16 +73,6 @@ namespace Azure.Communication.Administration.Models
                         continue;
                     }
                     capabilities = Capabilities.DeserializeCapabilities(property.Value);
-                    continue;
-                }
-                if (property.NameEquals("callbackUrl"))
-                {
-                    callbackUrl = property.Value.GetString();
-                    continue;
-                }
-                if (property.NameEquals("applicationId"))
-                {
-                    applicationId = property.Value.GetString();
                     continue;
                 }
                 if (property.NameEquals("monthlyRate"))
@@ -102,8 +85,18 @@ namespace Azure.Communication.Administration.Models
                     monthlyRate = MonthlyRate.DeserializeMonthlyRate(property.Value);
                     continue;
                 }
+                if (property.NameEquals("searchExpiresBy"))
+                {
+                    if (property.Value.ValueKind == JsonValueKind.Null)
+                    {
+                        property.ThrowNonNullablePropertyIsNull();
+                        continue;
+                    }
+                    searchExpiresBy = property.Value.GetDateTimeOffset("O");
+                    continue;
+                }
             }
-            return new AcquiredPhoneNumber(id.Value, phoneNumber.Value, countryCode.Value, Optional.ToNullable(numberType), Optional.ToNullable(assignmentType), Optional.ToNullable(purchaseDate), capabilities.Value, callbackUrl.Value, applicationId.Value, monthlyRate.Value);
+            return new SearchResult(id.Value, Optional.ToList(phoneNumbers), Optional.ToNullable(numberType), Optional.ToNullable(assignmentType), capabilities.Value, monthlyRate.Value, Optional.ToNullable(searchExpiresBy));
         }
     }
 }

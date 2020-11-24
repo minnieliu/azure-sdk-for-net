@@ -5,22 +5,30 @@
 
 #nullable disable
 
+using System;
 using System.Collections.Generic;
-using Azure.Core;
+using System.Linq;
 
 namespace Azure.Communication.Administration.Models
 {
-    /// <summary> A wrapper of list of phone numbers. </summary>
+    /// <summary> The list of acquired phone numbers. </summary>
     public partial class AcquiredPhoneNumbers
     {
         /// <summary> Initializes a new instance of AcquiredPhoneNumbers. </summary>
-        internal AcquiredPhoneNumbers()
+        /// <param name="phoneNumbers"> Represents a list of acquired phone numbers. </param>
+        /// <exception cref="ArgumentNullException"> <paramref name="phoneNumbers"/> is null. </exception>
+        internal AcquiredPhoneNumbers(IEnumerable<AcquiredPhoneNumber> phoneNumbers)
         {
-            PhoneNumbers = new ChangeTrackingList<AcquiredPhoneNumber>();
+            if (phoneNumbers == null)
+            {
+                throw new ArgumentNullException(nameof(phoneNumbers));
+            }
+
+            PhoneNumbers = phoneNumbers.ToList();
         }
 
         /// <summary> Initializes a new instance of AcquiredPhoneNumbers. </summary>
-        /// <param name="phoneNumbers"> Represents a list of phone numbers. </param>
+        /// <param name="phoneNumbers"> Represents a list of acquired phone numbers. </param>
         /// <param name="nextLink"> Represents the URL link to the next page. </param>
         internal AcquiredPhoneNumbers(IReadOnlyList<AcquiredPhoneNumber> phoneNumbers, string nextLink)
         {
@@ -28,7 +36,7 @@ namespace Azure.Communication.Administration.Models
             NextLink = nextLink;
         }
 
-        /// <summary> Represents a list of phone numbers. </summary>
+        /// <summary> Represents a list of acquired phone numbers. </summary>
         public IReadOnlyList<AcquiredPhoneNumber> PhoneNumbers { get; }
         /// <summary> Represents the URL link to the next page. </summary>
         public string NextLink { get; }

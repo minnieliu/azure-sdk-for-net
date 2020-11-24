@@ -11,22 +11,27 @@ using Azure.Core;
 
 namespace Azure.Communication.Administration.Models
 {
-    public partial class AcquiredPhoneNumbers
+    public partial class GeographicAreaCodes
     {
-        internal static AcquiredPhoneNumbers DeserializeAcquiredPhoneNumbers(JsonElement element)
+        internal static GeographicAreaCodes DeserializeGeographicAreaCodes(JsonElement element)
         {
-            IReadOnlyList<AcquiredPhoneNumber> phoneNumbers = default;
+            Optional<IReadOnlyList<CityAreaCodes>> cityAreaCodes = default;
             Optional<string> nextLink = default;
             foreach (var property in element.EnumerateObject())
             {
-                if (property.NameEquals("phoneNumbers"))
+                if (property.NameEquals("cityAreaCodes"))
                 {
-                    List<AcquiredPhoneNumber> array = new List<AcquiredPhoneNumber>();
+                    if (property.Value.ValueKind == JsonValueKind.Null)
+                    {
+                        property.ThrowNonNullablePropertyIsNull();
+                        continue;
+                    }
+                    List<CityAreaCodes> array = new List<CityAreaCodes>();
                     foreach (var item in property.Value.EnumerateArray())
                     {
-                        array.Add(AcquiredPhoneNumber.DeserializeAcquiredPhoneNumber(item));
+                        array.Add(Models.CityAreaCodes.DeserializeCityAreaCodes(item));
                     }
-                    phoneNumbers = array;
+                    cityAreaCodes = array;
                     continue;
                 }
                 if (property.NameEquals("nextLink"))
@@ -35,7 +40,7 @@ namespace Azure.Communication.Administration.Models
                     continue;
                 }
             }
-            return new AcquiredPhoneNumbers(phoneNumbers, nextLink.Value);
+            return new GeographicAreaCodes(Optional.ToList(cityAreaCodes), nextLink.Value);
         }
     }
 }

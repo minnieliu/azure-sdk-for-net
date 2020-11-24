@@ -40,25 +40,17 @@ namespace Azure.Communication.Administration
             _pipeline = pipeline;
         }
 
-        internal HttpMessage CreateGetAllPhoneNumbersRequest(string locale, int? skip, int? take)
+        internal HttpMessage CreateGetCountriesRequest(string locale)
         {
             var message = _pipeline.CreateMessage();
             var request = message.Request;
             request.Method = RequestMethod.Get;
             var uri = new RawRequestUriBuilder();
             uri.AppendRaw(endpoint, false);
-            uri.AppendPath("/administration/phonenumbers/phonenumbers", false);
+            uri.AppendPath("/availablePhoneNumbers/countries", false);
             if (locale != null)
             {
                 uri.AppendQuery("locale", locale, true);
-            }
-            if (skip != null)
-            {
-                uri.AppendQuery("skip", skip.Value, true);
-            }
-            if (take != null)
-            {
-                uri.AppendQuery("take", take.Value, true);
             }
             uri.AppendQuery("api-version", "2020-07-20-preview1", true);
             request.Uri = uri;
@@ -66,22 +58,20 @@ namespace Azure.Communication.Administration
             return message;
         }
 
-        /// <summary> Gets the list of the acquired phone numbers. </summary>
-        /// <param name="locale"> A language-locale pairing which will be used to localize the names of countries. </param>
-        /// <param name="skip"> An optional parameter for how many entries to skip, for pagination purposes. </param>
-        /// <param name="take"> An optional parameter for how many entries to return, for pagination purposes. </param>
+        /// <summary> Lists all countries with available phone numbers. </summary>
+        /// <param name="locale"> Language locale for localizing location names. </param>
         /// <param name="cancellationToken"> The cancellation token to use. </param>
-        public async Task<Response<AcquiredPhoneNumbers>> GetAllPhoneNumbersAsync(string locale = null, int? skip = null, int? take = null, CancellationToken cancellationToken = default)
+        public async Task<Response<CountriesResponse>> GetCountriesAsync(string locale = null, CancellationToken cancellationToken = default)
         {
-            using var message = CreateGetAllPhoneNumbersRequest(locale, skip, take);
+            using var message = CreateGetCountriesRequest(locale);
             await _pipeline.SendAsync(message, cancellationToken).ConfigureAwait(false);
             switch (message.Response.Status)
             {
                 case 200:
                     {
-                        AcquiredPhoneNumbers value = default;
+                        CountriesResponse value = default;
                         using var document = await JsonDocument.ParseAsync(message.Response.ContentStream, default, cancellationToken).ConfigureAwait(false);
-                        value = AcquiredPhoneNumbers.DeserializeAcquiredPhoneNumbers(document.RootElement);
+                        value = CountriesResponse.DeserializeCountriesResponse(document.RootElement);
                         return Response.FromValue(value, message.Response);
                     }
                 default:
@@ -89,22 +79,20 @@ namespace Azure.Communication.Administration
             }
         }
 
-        /// <summary> Gets the list of the acquired phone numbers. </summary>
-        /// <param name="locale"> A language-locale pairing which will be used to localize the names of countries. </param>
-        /// <param name="skip"> An optional parameter for how many entries to skip, for pagination purposes. </param>
-        /// <param name="take"> An optional parameter for how many entries to return, for pagination purposes. </param>
+        /// <summary> Lists all countries with available phone numbers. </summary>
+        /// <param name="locale"> Language locale for localizing location names. </param>
         /// <param name="cancellationToken"> The cancellation token to use. </param>
-        public Response<AcquiredPhoneNumbers> GetAllPhoneNumbers(string locale = null, int? skip = null, int? take = null, CancellationToken cancellationToken = default)
+        public Response<CountriesResponse> GetCountries(string locale = null, CancellationToken cancellationToken = default)
         {
-            using var message = CreateGetAllPhoneNumbersRequest(locale, skip, take);
+            using var message = CreateGetCountriesRequest(locale);
             _pipeline.Send(message, cancellationToken);
             switch (message.Response.Status)
             {
                 case 200:
                     {
-                        AcquiredPhoneNumbers value = default;
+                        CountriesResponse value = default;
                         using var document = JsonDocument.Parse(message.Response.ContentStream);
-                        value = AcquiredPhoneNumbers.DeserializeAcquiredPhoneNumbers(document.RootElement);
+                        value = CountriesResponse.DeserializeCountriesResponse(document.RootElement);
                         return Response.FromValue(value, message.Response);
                     }
                 default:
@@ -112,65 +100,42 @@ namespace Azure.Communication.Administration
             }
         }
 
-        internal HttpMessage CreateGetAllAreaCodesRequest(string locationType, string countryCode, string phonePlanId, IEnumerable<LocationOptionsQuery> locationOptions)
+        internal HttpMessage CreateGetTollFreeAreaCodesRequest(string countryCode)
         {
             var message = _pipeline.CreateMessage();
             var request = message.Request;
-            request.Method = RequestMethod.Post;
+            request.Method = RequestMethod.Get;
             var uri = new RawRequestUriBuilder();
             uri.AppendRaw(endpoint, false);
-            uri.AppendPath("/administration/phonenumbers/countries/", false);
+            uri.AppendPath("/availablePhoneNumbers/countries/", false);
             uri.AppendPath(countryCode, true);
-            uri.AppendPath("/areacodes", false);
-            uri.AppendQuery("locationType", locationType, true);
-            uri.AppendQuery("phonePlanId", phonePlanId, true);
+            uri.AppendPath("/areaCodes/tollFree", false);
             uri.AppendQuery("api-version", "2020-07-20-preview1", true);
             request.Uri = uri;
-            request.Headers.Add("Content-Type", "application/json");
             request.Headers.Add("Accept", "application/json");
-            LocationOptionsQueries locationOptionsQueries = new LocationOptionsQueries();
-            foreach (var value in locationOptions)
-            {
-                locationOptionsQueries.LocationOptions.Add(value);
-            }
-            var model = locationOptionsQueries;
-            var content = new Utf8JsonRequestContent();
-            content.JsonWriter.WriteObjectValue(model);
-            request.Content = content;
             return message;
         }
 
-        /// <summary> Gets a list of the supported area codes. </summary>
-        /// <param name="locationType"> The type of location information required by the plan. </param>
+        /// <summary> Lists available toll-free area codes for a country. </summary>
         /// <param name="countryCode"> The ISO 3166-2 country code. </param>
-        /// <param name="phonePlanId"> The plan id from which to search area codes. </param>
-        /// <param name="locationOptions"> Represents the underlying list of countries. </param>
         /// <param name="cancellationToken"> The cancellation token to use. </param>
-        /// <exception cref="ArgumentNullException"> <paramref name="locationType"/>, <paramref name="countryCode"/>, or <paramref name="phonePlanId"/> is null. </exception>
-        public async Task<Response<AreaCodes>> GetAllAreaCodesAsync(string locationType, string countryCode, string phonePlanId, IEnumerable<LocationOptionsQuery> locationOptions = null, CancellationToken cancellationToken = default)
+        /// <exception cref="ArgumentNullException"> <paramref name="countryCode"/> is null. </exception>
+        public async Task<Response<TollFreeAreaCodes>> GetTollFreeAreaCodesAsync(string countryCode, CancellationToken cancellationToken = default)
         {
-            if (locationType == null)
-            {
-                throw new ArgumentNullException(nameof(locationType));
-            }
             if (countryCode == null)
             {
                 throw new ArgumentNullException(nameof(countryCode));
             }
-            if (phonePlanId == null)
-            {
-                throw new ArgumentNullException(nameof(phonePlanId));
-            }
 
-            using var message = CreateGetAllAreaCodesRequest(locationType, countryCode, phonePlanId, locationOptions);
+            using var message = CreateGetTollFreeAreaCodesRequest(countryCode);
             await _pipeline.SendAsync(message, cancellationToken).ConfigureAwait(false);
             switch (message.Response.Status)
             {
                 case 200:
                     {
-                        AreaCodes value = default;
+                        TollFreeAreaCodes value = default;
                         using var document = await JsonDocument.ParseAsync(message.Response.ContentStream, default, cancellationToken).ConfigureAwait(false);
-                        value = AreaCodes.DeserializeAreaCodes(document.RootElement);
+                        value = TollFreeAreaCodes.DeserializeTollFreeAreaCodes(document.RootElement);
                         return Response.FromValue(value, message.Response);
                     }
                 default:
@@ -178,37 +143,26 @@ namespace Azure.Communication.Administration
             }
         }
 
-        /// <summary> Gets a list of the supported area codes. </summary>
-        /// <param name="locationType"> The type of location information required by the plan. </param>
+        /// <summary> Lists available toll-free area codes for a country. </summary>
         /// <param name="countryCode"> The ISO 3166-2 country code. </param>
-        /// <param name="phonePlanId"> The plan id from which to search area codes. </param>
-        /// <param name="locationOptions"> Represents the underlying list of countries. </param>
         /// <param name="cancellationToken"> The cancellation token to use. </param>
-        /// <exception cref="ArgumentNullException"> <paramref name="locationType"/>, <paramref name="countryCode"/>, or <paramref name="phonePlanId"/> is null. </exception>
-        public Response<AreaCodes> GetAllAreaCodes(string locationType, string countryCode, string phonePlanId, IEnumerable<LocationOptionsQuery> locationOptions = null, CancellationToken cancellationToken = default)
+        /// <exception cref="ArgumentNullException"> <paramref name="countryCode"/> is null. </exception>
+        public Response<TollFreeAreaCodes> GetTollFreeAreaCodes(string countryCode, CancellationToken cancellationToken = default)
         {
-            if (locationType == null)
-            {
-                throw new ArgumentNullException(nameof(locationType));
-            }
             if (countryCode == null)
             {
                 throw new ArgumentNullException(nameof(countryCode));
             }
-            if (phonePlanId == null)
-            {
-                throw new ArgumentNullException(nameof(phonePlanId));
-            }
 
-            using var message = CreateGetAllAreaCodesRequest(locationType, countryCode, phonePlanId, locationOptions);
+            using var message = CreateGetTollFreeAreaCodesRequest(countryCode);
             _pipeline.Send(message, cancellationToken);
             switch (message.Response.Status)
             {
                 case 200:
                     {
-                        AreaCodes value = default;
+                        TollFreeAreaCodes value = default;
                         using var document = JsonDocument.Parse(message.Response.ContentStream);
-                        value = AreaCodes.DeserializeAreaCodes(document.RootElement);
+                        value = TollFreeAreaCodes.DeserializeTollFreeAreaCodes(document.RootElement);
                         return Response.FromValue(value, message.Response);
                     }
                 default:
@@ -216,167 +170,23 @@ namespace Azure.Communication.Administration
             }
         }
 
-        internal HttpMessage CreateGetCapabilitiesUpdateRequest(string capabilitiesUpdateId)
+        internal HttpMessage CreateGetGeographicAreaCodesRequest(string countryCode, string locale, string locationPath)
         {
             var message = _pipeline.CreateMessage();
             var request = message.Request;
             request.Method = RequestMethod.Get;
             var uri = new RawRequestUriBuilder();
             uri.AppendRaw(endpoint, false);
-            uri.AppendPath("/administration/phonenumbers/capabilities/", false);
-            uri.AppendPath(capabilitiesUpdateId, true);
-            uri.AppendQuery("api-version", "2020-07-20-preview1", true);
-            request.Uri = uri;
-            request.Headers.Add("Accept", "application/json");
-            return message;
-        }
-
-        /// <summary> Get capabilities by capabilities update id. </summary>
-        /// <param name="capabilitiesUpdateId"> The String to use. </param>
-        /// <param name="cancellationToken"> The cancellation token to use. </param>
-        /// <exception cref="ArgumentNullException"> <paramref name="capabilitiesUpdateId"/> is null. </exception>
-        public async Task<Response<UpdatePhoneNumberCapabilitiesResponse>> GetCapabilitiesUpdateAsync(string capabilitiesUpdateId, CancellationToken cancellationToken = default)
-        {
-            if (capabilitiesUpdateId == null)
-            {
-                throw new ArgumentNullException(nameof(capabilitiesUpdateId));
-            }
-
-            using var message = CreateGetCapabilitiesUpdateRequest(capabilitiesUpdateId);
-            await _pipeline.SendAsync(message, cancellationToken).ConfigureAwait(false);
-            switch (message.Response.Status)
-            {
-                case 200:
-                    {
-                        UpdatePhoneNumberCapabilitiesResponse value = default;
-                        using var document = await JsonDocument.ParseAsync(message.Response.ContentStream, default, cancellationToken).ConfigureAwait(false);
-                        value = UpdatePhoneNumberCapabilitiesResponse.DeserializeUpdatePhoneNumberCapabilitiesResponse(document.RootElement);
-                        return Response.FromValue(value, message.Response);
-                    }
-                default:
-                    throw await _clientDiagnostics.CreateRequestFailedExceptionAsync(message.Response).ConfigureAwait(false);
-            }
-        }
-
-        /// <summary> Get capabilities by capabilities update id. </summary>
-        /// <param name="capabilitiesUpdateId"> The String to use. </param>
-        /// <param name="cancellationToken"> The cancellation token to use. </param>
-        /// <exception cref="ArgumentNullException"> <paramref name="capabilitiesUpdateId"/> is null. </exception>
-        public Response<UpdatePhoneNumberCapabilitiesResponse> GetCapabilitiesUpdate(string capabilitiesUpdateId, CancellationToken cancellationToken = default)
-        {
-            if (capabilitiesUpdateId == null)
-            {
-                throw new ArgumentNullException(nameof(capabilitiesUpdateId));
-            }
-
-            using var message = CreateGetCapabilitiesUpdateRequest(capabilitiesUpdateId);
-            _pipeline.Send(message, cancellationToken);
-            switch (message.Response.Status)
-            {
-                case 200:
-                    {
-                        UpdatePhoneNumberCapabilitiesResponse value = default;
-                        using var document = JsonDocument.Parse(message.Response.ContentStream);
-                        value = UpdatePhoneNumberCapabilitiesResponse.DeserializeUpdatePhoneNumberCapabilitiesResponse(document.RootElement);
-                        return Response.FromValue(value, message.Response);
-                    }
-                default:
-                    throw _clientDiagnostics.CreateRequestFailedException(message.Response);
-            }
-        }
-
-        internal HttpMessage CreateUpdateCapabilitiesRequest(IDictionary<string, NumberUpdateCapabilities> phoneNumberCapabilitiesUpdate)
-        {
-            var message = _pipeline.CreateMessage();
-            var request = message.Request;
-            request.Method = RequestMethod.Post;
-            var uri = new RawRequestUriBuilder();
-            uri.AppendRaw(endpoint, false);
-            uri.AppendPath("/administration/phonenumbers/capabilities", false);
-            uri.AppendQuery("api-version", "2020-07-20-preview1", true);
-            request.Uri = uri;
-            request.Headers.Add("Content-Type", "application/json");
-            request.Headers.Add("Accept", "application/json");
-            var model = new UpdateNumberCapabilitiesRequest(phoneNumberCapabilitiesUpdate);
-            var content = new Utf8JsonRequestContent();
-            content.JsonWriter.WriteObjectValue(model);
-            request.Content = content;
-            return message;
-        }
-
-        /// <summary> Adds or removes phone number capabilities. </summary>
-        /// <param name="phoneNumberCapabilitiesUpdate"> The map of phone numbers to the capabilities update applied to the phone number. </param>
-        /// <param name="cancellationToken"> The cancellation token to use. </param>
-        /// <exception cref="ArgumentNullException"> <paramref name="phoneNumberCapabilitiesUpdate"/> is null. </exception>
-        public async Task<Response<UpdateNumberCapabilitiesResponse>> UpdateCapabilitiesAsync(IDictionary<string, NumberUpdateCapabilities> phoneNumberCapabilitiesUpdate, CancellationToken cancellationToken = default)
-        {
-            if (phoneNumberCapabilitiesUpdate == null)
-            {
-                throw new ArgumentNullException(nameof(phoneNumberCapabilitiesUpdate));
-            }
-
-            using var message = CreateUpdateCapabilitiesRequest(phoneNumberCapabilitiesUpdate);
-            await _pipeline.SendAsync(message, cancellationToken).ConfigureAwait(false);
-            switch (message.Response.Status)
-            {
-                case 200:
-                    {
-                        UpdateNumberCapabilitiesResponse value = default;
-                        using var document = await JsonDocument.ParseAsync(message.Response.ContentStream, default, cancellationToken).ConfigureAwait(false);
-                        value = UpdateNumberCapabilitiesResponse.DeserializeUpdateNumberCapabilitiesResponse(document.RootElement);
-                        return Response.FromValue(value, message.Response);
-                    }
-                default:
-                    throw await _clientDiagnostics.CreateRequestFailedExceptionAsync(message.Response).ConfigureAwait(false);
-            }
-        }
-
-        /// <summary> Adds or removes phone number capabilities. </summary>
-        /// <param name="phoneNumberCapabilitiesUpdate"> The map of phone numbers to the capabilities update applied to the phone number. </param>
-        /// <param name="cancellationToken"> The cancellation token to use. </param>
-        /// <exception cref="ArgumentNullException"> <paramref name="phoneNumberCapabilitiesUpdate"/> is null. </exception>
-        public Response<UpdateNumberCapabilitiesResponse> UpdateCapabilities(IDictionary<string, NumberUpdateCapabilities> phoneNumberCapabilitiesUpdate, CancellationToken cancellationToken = default)
-        {
-            if (phoneNumberCapabilitiesUpdate == null)
-            {
-                throw new ArgumentNullException(nameof(phoneNumberCapabilitiesUpdate));
-            }
-
-            using var message = CreateUpdateCapabilitiesRequest(phoneNumberCapabilitiesUpdate);
-            _pipeline.Send(message, cancellationToken);
-            switch (message.Response.Status)
-            {
-                case 200:
-                    {
-                        UpdateNumberCapabilitiesResponse value = default;
-                        using var document = JsonDocument.Parse(message.Response.ContentStream);
-                        value = UpdateNumberCapabilitiesResponse.DeserializeUpdateNumberCapabilitiesResponse(document.RootElement);
-                        return Response.FromValue(value, message.Response);
-                    }
-                default:
-                    throw _clientDiagnostics.CreateRequestFailedException(message.Response);
-            }
-        }
-
-        internal HttpMessage CreateGetAllSupportedCountriesRequest(string locale, int? skip, int? take)
-        {
-            var message = _pipeline.CreateMessage();
-            var request = message.Request;
-            request.Method = RequestMethod.Get;
-            var uri = new RawRequestUriBuilder();
-            uri.AppendRaw(endpoint, false);
-            uri.AppendPath("/administration/phonenumbers/countries", false);
+            uri.AppendPath("/availablePhoneNumbers/countries/", false);
+            uri.AppendPath(countryCode, true);
+            uri.AppendPath("/areaCodes/geographic", false);
             if (locale != null)
             {
                 uri.AppendQuery("locale", locale, true);
             }
-            if (skip != null)
+            if (locationPath != null)
             {
-                uri.AppendQuery("skip", skip.Value, true);
-            }
-            if (take != null)
-            {
-                uri.AppendQuery("take", take.Value, true);
+                uri.AppendQuery("locationPath", locationPath, true);
             }
             uri.AppendQuery("api-version", "2020-07-20-preview1", true);
             request.Uri = uri;
@@ -384,22 +194,28 @@ namespace Azure.Communication.Administration
             return message;
         }
 
-        /// <summary> Gets a list of supported countries. </summary>
-        /// <param name="locale"> A language-locale pairing which will be used to localize the names of countries. </param>
-        /// <param name="skip"> An optional parameter for how many entries to skip, for pagination purposes. </param>
-        /// <param name="take"> An optional parameter for how many entries to return, for pagination purposes. </param>
+        /// <summary> Pass a component-url-encoded location to narrow down to a region. </summary>
+        /// <param name="countryCode"> The ISO 3166-2 country code. </param>
+        /// <param name="locale"> Language locale for localizing location names. </param>
+        /// <param name="locationPath"> A URL-encoded location path starting with the region/state/province and optionally narrowed down to municipality. Examples: Ontario, Washington%20State%2FRedmond. </param>
         /// <param name="cancellationToken"> The cancellation token to use. </param>
-        public async Task<Response<PhoneNumberCountries>> GetAllSupportedCountriesAsync(string locale = null, int? skip = null, int? take = null, CancellationToken cancellationToken = default)
+        /// <exception cref="ArgumentNullException"> <paramref name="countryCode"/> is null. </exception>
+        public async Task<Response<GeographicAreaCodes>> GetGeographicAreaCodesAsync(string countryCode, string locale = null, string locationPath = null, CancellationToken cancellationToken = default)
         {
-            using var message = CreateGetAllSupportedCountriesRequest(locale, skip, take);
+            if (countryCode == null)
+            {
+                throw new ArgumentNullException(nameof(countryCode));
+            }
+
+            using var message = CreateGetGeographicAreaCodesRequest(countryCode, locale, locationPath);
             await _pipeline.SendAsync(message, cancellationToken).ConfigureAwait(false);
             switch (message.Response.Status)
             {
                 case 200:
                     {
-                        PhoneNumberCountries value = default;
+                        GeographicAreaCodes value = default;
                         using var document = await JsonDocument.ParseAsync(message.Response.ContentStream, default, cancellationToken).ConfigureAwait(false);
-                        value = PhoneNumberCountries.DeserializePhoneNumberCountries(document.RootElement);
+                        value = GeographicAreaCodes.DeserializeGeographicAreaCodes(document.RootElement);
                         return Response.FromValue(value, message.Response);
                     }
                 default:
@@ -407,22 +223,28 @@ namespace Azure.Communication.Administration
             }
         }
 
-        /// <summary> Gets a list of supported countries. </summary>
-        /// <param name="locale"> A language-locale pairing which will be used to localize the names of countries. </param>
-        /// <param name="skip"> An optional parameter for how many entries to skip, for pagination purposes. </param>
-        /// <param name="take"> An optional parameter for how many entries to return, for pagination purposes. </param>
+        /// <summary> Pass a component-url-encoded location to narrow down to a region. </summary>
+        /// <param name="countryCode"> The ISO 3166-2 country code. </param>
+        /// <param name="locale"> Language locale for localizing location names. </param>
+        /// <param name="locationPath"> A URL-encoded location path starting with the region/state/province and optionally narrowed down to municipality. Examples: Ontario, Washington%20State%2FRedmond. </param>
         /// <param name="cancellationToken"> The cancellation token to use. </param>
-        public Response<PhoneNumberCountries> GetAllSupportedCountries(string locale = null, int? skip = null, int? take = null, CancellationToken cancellationToken = default)
+        /// <exception cref="ArgumentNullException"> <paramref name="countryCode"/> is null. </exception>
+        public Response<GeographicAreaCodes> GetGeographicAreaCodes(string countryCode, string locale = null, string locationPath = null, CancellationToken cancellationToken = default)
         {
-            using var message = CreateGetAllSupportedCountriesRequest(locale, skip, take);
+            if (countryCode == null)
+            {
+                throw new ArgumentNullException(nameof(countryCode));
+            }
+
+            using var message = CreateGetGeographicAreaCodesRequest(countryCode, locale, locationPath);
             _pipeline.Send(message, cancellationToken);
             switch (message.Response.Status)
             {
                 case 200:
                     {
-                        PhoneNumberCountries value = default;
+                        GeographicAreaCodes value = default;
                         using var document = JsonDocument.Parse(message.Response.ContentStream);
-                        value = PhoneNumberCountries.DeserializePhoneNumberCountries(document.RootElement);
+                        value = GeographicAreaCodes.DeserializeGeographicAreaCodes(document.RootElement);
                         return Response.FromValue(value, message.Response);
                     }
                 default:
@@ -430,45 +252,222 @@ namespace Azure.Communication.Administration
             }
         }
 
-        internal HttpMessage CreateGetNumberConfigurationRequest(string phoneNumber)
+        internal HttpMessage CreateGetOfferingsRequest(string countryCode, PhoneNumberType? numberType, AssignmentType? assignmentType)
+        {
+            var message = _pipeline.CreateMessage();
+            var request = message.Request;
+            request.Method = RequestMethod.Get;
+            var uri = new RawRequestUriBuilder();
+            uri.AppendRaw(endpoint, false);
+            uri.AppendPath("/availablePhoneNumbers/countries/", false);
+            uri.AppendPath(countryCode, true);
+            uri.AppendPath("/offerings", false);
+            if (numberType != null)
+            {
+                uri.AppendQuery("numberType", numberType.Value.ToString(), true);
+            }
+            if (assignmentType != null)
+            {
+                uri.AppendQuery("assignmentType", assignmentType.Value.ToString(), true);
+            }
+            uri.AppendQuery("api-version", "2020-07-20-preview1", true);
+            request.Uri = uri;
+            request.Headers.Add("Accept", "application/json");
+            return message;
+        }
+
+        /// <summary> List available offerings for the given country. </summary>
+        /// <param name="countryCode"> The ISO 3166-2 country code. </param>
+        /// <param name="numberType"> Filter by numberType. </param>
+        /// <param name="assignmentType"> Filter by assignmentType. </param>
+        /// <param name="cancellationToken"> The cancellation token to use. </param>
+        /// <exception cref="ArgumentNullException"> <paramref name="countryCode"/> is null. </exception>
+        public async Task<Response<IReadOnlyList<CountryOffering>>> GetOfferingsAsync(string countryCode, PhoneNumberType? numberType = null, AssignmentType? assignmentType = null, CancellationToken cancellationToken = default)
+        {
+            if (countryCode == null)
+            {
+                throw new ArgumentNullException(nameof(countryCode));
+            }
+
+            using var message = CreateGetOfferingsRequest(countryCode, numberType, assignmentType);
+            await _pipeline.SendAsync(message, cancellationToken).ConfigureAwait(false);
+            switch (message.Response.Status)
+            {
+                case 200:
+                    {
+                        IReadOnlyList<CountryOffering> value = default;
+                        using var document = await JsonDocument.ParseAsync(message.Response.ContentStream, default, cancellationToken).ConfigureAwait(false);
+                        List<CountryOffering> array = new List<CountryOffering>();
+                        foreach (var item in document.RootElement.EnumerateArray())
+                        {
+                            array.Add(CountryOffering.DeserializeCountryOffering(item));
+                        }
+                        value = array;
+                        return Response.FromValue(value, message.Response);
+                    }
+                default:
+                    throw await _clientDiagnostics.CreateRequestFailedExceptionAsync(message.Response).ConfigureAwait(false);
+            }
+        }
+
+        /// <summary> List available offerings for the given country. </summary>
+        /// <param name="countryCode"> The ISO 3166-2 country code. </param>
+        /// <param name="numberType"> Filter by numberType. </param>
+        /// <param name="assignmentType"> Filter by assignmentType. </param>
+        /// <param name="cancellationToken"> The cancellation token to use. </param>
+        /// <exception cref="ArgumentNullException"> <paramref name="countryCode"/> is null. </exception>
+        public Response<IReadOnlyList<CountryOffering>> GetOfferings(string countryCode, PhoneNumberType? numberType = null, AssignmentType? assignmentType = null, CancellationToken cancellationToken = default)
+        {
+            if (countryCode == null)
+            {
+                throw new ArgumentNullException(nameof(countryCode));
+            }
+
+            using var message = CreateGetOfferingsRequest(countryCode, numberType, assignmentType);
+            _pipeline.Send(message, cancellationToken);
+            switch (message.Response.Status)
+            {
+                case 200:
+                    {
+                        IReadOnlyList<CountryOffering> value = default;
+                        using var document = JsonDocument.Parse(message.Response.ContentStream);
+                        List<CountryOffering> array = new List<CountryOffering>();
+                        foreach (var item in document.RootElement.EnumerateArray())
+                        {
+                            array.Add(CountryOffering.DeserializeCountryOffering(item));
+                        }
+                        value = array;
+                        return Response.FromValue(value, message.Response);
+                    }
+                default:
+                    throw _clientDiagnostics.CreateRequestFailedException(message.Response);
+            }
+        }
+
+        internal HttpMessage CreateSearchAvailablePhoneNumbersRequest(string countryCode, PhoneNumberType numberType, AssignmentType assignmentType, Capabilities capabilities, string areaCode, int? quantity)
         {
             var message = _pipeline.CreateMessage();
             var request = message.Request;
             request.Method = RequestMethod.Post;
             var uri = new RawRequestUriBuilder();
             uri.AppendRaw(endpoint, false);
-            uri.AppendPath("/administration/phonenumbers/numberconfiguration", false);
+            uri.AppendPath("/availablePhoneNumbers/countries/", false);
+            uri.AppendPath(countryCode, true);
+            uri.AppendPath("/~search", false);
             uri.AppendQuery("api-version", "2020-07-20-preview1", true);
             request.Uri = uri;
             request.Headers.Add("Content-Type", "application/json");
             request.Headers.Add("Accept", "application/json");
-            var model = new NumberConfigurationPhoneNumber(phoneNumber);
+            var model = new SearchRequest(numberType, assignmentType, capabilities)
+            {
+                AreaCode = areaCode,
+                Quantity = quantity
+            };
             var content = new Utf8JsonRequestContent();
             content.JsonWriter.WriteObjectValue(model);
             request.Content = content;
             return message;
         }
 
-        /// <summary> Endpoint for getting number configurations. </summary>
-        /// <param name="phoneNumber"> The phone number in the E.164 format. </param>
+        /// <summary> Search for available phone numbers to purchase. </summary>
+        /// <param name="countryCode"> The ISO 3166-2 country code. </param>
+        /// <param name="numberType"> The phone number type. </param>
+        /// <param name="assignmentType"> The phone number&apos;s assignment type. </param>
+        /// <param name="capabilities"> The phone number&apos;s capabilities. </param>
+        /// <param name="areaCode"> The desired area code. </param>
+        /// <param name="quantity"> The desired quantity of phone numbers. </param>
         /// <param name="cancellationToken"> The cancellation token to use. </param>
-        /// <exception cref="ArgumentNullException"> <paramref name="phoneNumber"/> is null. </exception>
-        public async Task<Response<NumberConfigurationResponse>> GetNumberConfigurationAsync(string phoneNumber, CancellationToken cancellationToken = default)
+        /// <exception cref="ArgumentNullException"> <paramref name="countryCode"/> or <paramref name="capabilities"/> is null. </exception>
+        public async Task<ResponseWithHeaders<PhoneNumberAdministrationSearchAvailablePhoneNumbersHeaders>> SearchAvailablePhoneNumbersAsync(string countryCode, PhoneNumberType numberType, AssignmentType assignmentType, Capabilities capabilities, string areaCode = null, int? quantity = null, CancellationToken cancellationToken = default)
         {
-            if (phoneNumber == null)
+            if (countryCode == null)
             {
-                throw new ArgumentNullException(nameof(phoneNumber));
+                throw new ArgumentNullException(nameof(countryCode));
+            }
+            if (capabilities == null)
+            {
+                throw new ArgumentNullException(nameof(capabilities));
             }
 
-            using var message = CreateGetNumberConfigurationRequest(phoneNumber);
+            using var message = CreateSearchAvailablePhoneNumbersRequest(countryCode, numberType, assignmentType, capabilities, areaCode, quantity);
+            await _pipeline.SendAsync(message, cancellationToken).ConfigureAwait(false);
+            var headers = new PhoneNumberAdministrationSearchAvailablePhoneNumbersHeaders(message.Response);
+            switch (message.Response.Status)
+            {
+                case 202:
+                    return ResponseWithHeaders.FromValue(headers, message.Response);
+                default:
+                    throw await _clientDiagnostics.CreateRequestFailedExceptionAsync(message.Response).ConfigureAwait(false);
+            }
+        }
+
+        /// <summary> Search for available phone numbers to purchase. </summary>
+        /// <param name="countryCode"> The ISO 3166-2 country code. </param>
+        /// <param name="numberType"> The phone number type. </param>
+        /// <param name="assignmentType"> The phone number&apos;s assignment type. </param>
+        /// <param name="capabilities"> The phone number&apos;s capabilities. </param>
+        /// <param name="areaCode"> The desired area code. </param>
+        /// <param name="quantity"> The desired quantity of phone numbers. </param>
+        /// <param name="cancellationToken"> The cancellation token to use. </param>
+        /// <exception cref="ArgumentNullException"> <paramref name="countryCode"/> or <paramref name="capabilities"/> is null. </exception>
+        public ResponseWithHeaders<PhoneNumberAdministrationSearchAvailablePhoneNumbersHeaders> SearchAvailablePhoneNumbers(string countryCode, PhoneNumberType numberType, AssignmentType assignmentType, Capabilities capabilities, string areaCode = null, int? quantity = null, CancellationToken cancellationToken = default)
+        {
+            if (countryCode == null)
+            {
+                throw new ArgumentNullException(nameof(countryCode));
+            }
+            if (capabilities == null)
+            {
+                throw new ArgumentNullException(nameof(capabilities));
+            }
+
+            using var message = CreateSearchAvailablePhoneNumbersRequest(countryCode, numberType, assignmentType, capabilities, areaCode, quantity);
+            _pipeline.Send(message, cancellationToken);
+            var headers = new PhoneNumberAdministrationSearchAvailablePhoneNumbersHeaders(message.Response);
+            switch (message.Response.Status)
+            {
+                case 202:
+                    return ResponseWithHeaders.FromValue(headers, message.Response);
+                default:
+                    throw _clientDiagnostics.CreateRequestFailedException(message.Response);
+            }
+        }
+
+        internal HttpMessage CreateGetSearchResultRequest(string searchId)
+        {
+            var message = _pipeline.CreateMessage();
+            var request = message.Request;
+            request.Method = RequestMethod.Get;
+            var uri = new RawRequestUriBuilder();
+            uri.AppendRaw(endpoint, false);
+            uri.AppendPath("/availablePhoneNumbers/searchResults/", false);
+            uri.AppendPath(searchId, true);
+            uri.AppendQuery("api-version", "2020-07-20-preview1", true);
+            request.Uri = uri;
+            request.Headers.Add("Accept", "application/json");
+            return message;
+        }
+
+        /// <summary> Get a search result by its id. </summary>
+        /// <param name="searchId"> The search Id. </param>
+        /// <param name="cancellationToken"> The cancellation token to use. </param>
+        /// <exception cref="ArgumentNullException"> <paramref name="searchId"/> is null. </exception>
+        public async Task<Response<SearchResult>> GetSearchResultAsync(string searchId, CancellationToken cancellationToken = default)
+        {
+            if (searchId == null)
+            {
+                throw new ArgumentNullException(nameof(searchId));
+            }
+
+            using var message = CreateGetSearchResultRequest(searchId);
             await _pipeline.SendAsync(message, cancellationToken).ConfigureAwait(false);
             switch (message.Response.Status)
             {
                 case 200:
                     {
-                        NumberConfigurationResponse value = default;
+                        SearchResult value = default;
                         using var document = await JsonDocument.ParseAsync(message.Response.ContentStream, default, cancellationToken).ConfigureAwait(false);
-                        value = NumberConfigurationResponse.DeserializeNumberConfigurationResponse(document.RootElement);
+                        value = SearchResult.DeserializeSearchResult(document.RootElement);
                         return Response.FromValue(value, message.Response);
                     }
                 default:
@@ -476,26 +475,26 @@ namespace Azure.Communication.Administration
             }
         }
 
-        /// <summary> Endpoint for getting number configurations. </summary>
-        /// <param name="phoneNumber"> The phone number in the E.164 format. </param>
+        /// <summary> Get a search result by its id. </summary>
+        /// <param name="searchId"> The search Id. </param>
         /// <param name="cancellationToken"> The cancellation token to use. </param>
-        /// <exception cref="ArgumentNullException"> <paramref name="phoneNumber"/> is null. </exception>
-        public Response<NumberConfigurationResponse> GetNumberConfiguration(string phoneNumber, CancellationToken cancellationToken = default)
+        /// <exception cref="ArgumentNullException"> <paramref name="searchId"/> is null. </exception>
+        public Response<SearchResult> GetSearchResult(string searchId, CancellationToken cancellationToken = default)
         {
-            if (phoneNumber == null)
+            if (searchId == null)
             {
-                throw new ArgumentNullException(nameof(phoneNumber));
+                throw new ArgumentNullException(nameof(searchId));
             }
 
-            using var message = CreateGetNumberConfigurationRequest(phoneNumber);
+            using var message = CreateGetSearchResultRequest(searchId);
             _pipeline.Send(message, cancellationToken);
             switch (message.Response.Status)
             {
                 case 200:
                     {
-                        NumberConfigurationResponse value = default;
+                        SearchResult value = default;
                         using var document = JsonDocument.Parse(message.Response.ContentStream);
-                        value = NumberConfigurationResponse.DeserializeNumberConfigurationResponse(document.RootElement);
+                        value = SearchResult.DeserializeSearchResult(document.RootElement);
                         return Response.FromValue(value, message.Response);
                     }
                 default:
@@ -503,1423 +502,446 @@ namespace Azure.Communication.Administration
             }
         }
 
-        internal HttpMessage CreateConfigureNumberRequest(PstnConfiguration pstnConfiguration, string phoneNumber)
+        internal HttpMessage CreatePurchasePhoneNumbersRequest(string searchId)
+        {
+            var message = _pipeline.CreateMessage();
+            var request = message.Request;
+            request.Method = RequestMethod.Post;
+            var uri = new RawRequestUriBuilder();
+            uri.AppendRaw(endpoint, false);
+            uri.AppendPath("/availablePhoneNumbers/~purchase", false);
+            uri.AppendQuery("api-version", "2020-07-20-preview1", true);
+            request.Uri = uri;
+            request.Headers.Add("Content-Type", "application/json");
+            request.Headers.Add("Accept", "application/json");
+            var model = new PurchaseRequest()
+            {
+                SearchId = searchId
+            };
+            var content = new Utf8JsonRequestContent();
+            content.JsonWriter.WriteObjectValue(model);
+            request.Content = content;
+            return message;
+        }
+
+        /// <summary> Purchase phone numbers. </summary>
+        /// <param name="searchId"> The id of the search result to purchase. </param>
+        /// <param name="cancellationToken"> The cancellation token to use. </param>
+        public async Task<ResponseWithHeaders<PhoneNumberAdministrationPurchasePhoneNumbersHeaders>> PurchasePhoneNumbersAsync(string searchId = null, CancellationToken cancellationToken = default)
+        {
+            using var message = CreatePurchasePhoneNumbersRequest(searchId);
+            await _pipeline.SendAsync(message, cancellationToken).ConfigureAwait(false);
+            var headers = new PhoneNumberAdministrationPurchasePhoneNumbersHeaders(message.Response);
+            switch (message.Response.Status)
+            {
+                case 202:
+                    return ResponseWithHeaders.FromValue(headers, message.Response);
+                default:
+                    throw await _clientDiagnostics.CreateRequestFailedExceptionAsync(message.Response).ConfigureAwait(false);
+            }
+        }
+
+        /// <summary> Purchase phone numbers. </summary>
+        /// <param name="searchId"> The id of the search result to purchase. </param>
+        /// <param name="cancellationToken"> The cancellation token to use. </param>
+        public ResponseWithHeaders<PhoneNumberAdministrationPurchasePhoneNumbersHeaders> PurchasePhoneNumbers(string searchId = null, CancellationToken cancellationToken = default)
+        {
+            using var message = CreatePurchasePhoneNumbersRequest(searchId);
+            _pipeline.Send(message, cancellationToken);
+            var headers = new PhoneNumberAdministrationPurchasePhoneNumbersHeaders(message.Response);
+            switch (message.Response.Status)
+            {
+                case 202:
+                    return ResponseWithHeaders.FromValue(headers, message.Response);
+                default:
+                    throw _clientDiagnostics.CreateRequestFailedException(message.Response);
+            }
+        }
+
+        internal HttpMessage CreateGetOperationRequest(string operationId)
+        {
+            var message = _pipeline.CreateMessage();
+            var request = message.Request;
+            request.Method = RequestMethod.Get;
+            var uri = new RawRequestUriBuilder();
+            uri.AppendRaw(endpoint, false);
+            uri.AppendPath("/phoneNumbers/operations/", false);
+            uri.AppendPath(operationId, true);
+            uri.AppendQuery("api-version", "2020-07-20-preview1", true);
+            request.Uri = uri;
+            request.Headers.Add("Accept", "application/json");
+            return message;
+        }
+
+        /// <summary> Get an operation by its id. </summary>
+        /// <param name="operationId"> The operation Id. </param>
+        /// <param name="cancellationToken"> The cancellation token to use. </param>
+        /// <exception cref="ArgumentNullException"> <paramref name="operationId"/> is null. </exception>
+        public async Task<Response<Operation>> GetOperationAsync(string operationId, CancellationToken cancellationToken = default)
+        {
+            if (operationId == null)
+            {
+                throw new ArgumentNullException(nameof(operationId));
+            }
+
+            using var message = CreateGetOperationRequest(operationId);
+            await _pipeline.SendAsync(message, cancellationToken).ConfigureAwait(false);
+            switch (message.Response.Status)
+            {
+                case 200:
+                    {
+                        Operation value = default;
+                        using var document = await JsonDocument.ParseAsync(message.Response.ContentStream, default, cancellationToken).ConfigureAwait(false);
+                        value = Operation.DeserializeOperation(document.RootElement);
+                        return Response.FromValue(value, message.Response);
+                    }
+                default:
+                    throw await _clientDiagnostics.CreateRequestFailedExceptionAsync(message.Response).ConfigureAwait(false);
+            }
+        }
+
+        /// <summary> Get an operation by its id. </summary>
+        /// <param name="operationId"> The operation Id. </param>
+        /// <param name="cancellationToken"> The cancellation token to use. </param>
+        /// <exception cref="ArgumentNullException"> <paramref name="operationId"/> is null. </exception>
+        public Response<Operation> GetOperation(string operationId, CancellationToken cancellationToken = default)
+        {
+            if (operationId == null)
+            {
+                throw new ArgumentNullException(nameof(operationId));
+            }
+
+            using var message = CreateGetOperationRequest(operationId);
+            _pipeline.Send(message, cancellationToken);
+            switch (message.Response.Status)
+            {
+                case 200:
+                    {
+                        Operation value = default;
+                        using var document = JsonDocument.Parse(message.Response.ContentStream);
+                        value = Operation.DeserializeOperation(document.RootElement);
+                        return Response.FromValue(value, message.Response);
+                    }
+                default:
+                    throw _clientDiagnostics.CreateRequestFailedException(message.Response);
+            }
+        }
+
+        internal HttpMessage CreateCancelOperationRequest(string operationId)
+        {
+            var message = _pipeline.CreateMessage();
+            var request = message.Request;
+            request.Method = RequestMethod.Delete;
+            var uri = new RawRequestUriBuilder();
+            uri.AppendRaw(endpoint, false);
+            uri.AppendPath("/phoneNumbers/operations/", false);
+            uri.AppendPath(operationId, true);
+            uri.AppendQuery("api-version", "2020-07-20-preview1", true);
+            request.Uri = uri;
+            request.Headers.Add("Accept", "application/json");
+            return message;
+        }
+
+        /// <summary> Cancels the operation if cancellation is supported for the operation type. </summary>
+        /// <param name="operationId"> The operation Id. </param>
+        /// <param name="cancellationToken"> The cancellation token to use. </param>
+        /// <exception cref="ArgumentNullException"> <paramref name="operationId"/> is null. </exception>
+        public async Task<Response> CancelOperationAsync(string operationId, CancellationToken cancellationToken = default)
+        {
+            if (operationId == null)
+            {
+                throw new ArgumentNullException(nameof(operationId));
+            }
+
+            using var message = CreateCancelOperationRequest(operationId);
+            await _pipeline.SendAsync(message, cancellationToken).ConfigureAwait(false);
+            switch (message.Response.Status)
+            {
+                case 200:
+                    return message.Response;
+                default:
+                    throw await _clientDiagnostics.CreateRequestFailedExceptionAsync(message.Response).ConfigureAwait(false);
+            }
+        }
+
+        /// <summary> Cancels the operation if cancellation is supported for the operation type. </summary>
+        /// <param name="operationId"> The operation Id. </param>
+        /// <param name="cancellationToken"> The cancellation token to use. </param>
+        /// <exception cref="ArgumentNullException"> <paramref name="operationId"/> is null. </exception>
+        public Response CancelOperation(string operationId, CancellationToken cancellationToken = default)
+        {
+            if (operationId == null)
+            {
+                throw new ArgumentNullException(nameof(operationId));
+            }
+
+            using var message = CreateCancelOperationRequest(operationId);
+            _pipeline.Send(message, cancellationToken);
+            switch (message.Response.Status)
+            {
+                case 200:
+                    return message.Response;
+                default:
+                    throw _clientDiagnostics.CreateRequestFailedException(message.Response);
+            }
+        }
+
+        internal HttpMessage CreateGetPhoneNumbersRequest()
+        {
+            var message = _pipeline.CreateMessage();
+            var request = message.Request;
+            request.Method = RequestMethod.Get;
+            var uri = new RawRequestUriBuilder();
+            uri.AppendRaw(endpoint, false);
+            uri.AppendPath("/phoneNumbers", false);
+            uri.AppendQuery("api-version", "2020-07-20-preview1", true);
+            request.Uri = uri;
+            request.Headers.Add("Accept", "application/json");
+            return message;
+        }
+
+        /// <summary> Lists acquired phone numbers. </summary>
+        /// <param name="cancellationToken"> The cancellation token to use. </param>
+        public async Task<Response<AcquiredPhoneNumbers>> GetPhoneNumbersAsync(CancellationToken cancellationToken = default)
+        {
+            using var message = CreateGetPhoneNumbersRequest();
+            await _pipeline.SendAsync(message, cancellationToken).ConfigureAwait(false);
+            switch (message.Response.Status)
+            {
+                case 200:
+                    {
+                        AcquiredPhoneNumbers value = default;
+                        using var document = await JsonDocument.ParseAsync(message.Response.ContentStream, default, cancellationToken).ConfigureAwait(false);
+                        value = AcquiredPhoneNumbers.DeserializeAcquiredPhoneNumbers(document.RootElement);
+                        return Response.FromValue(value, message.Response);
+                    }
+                default:
+                    throw await _clientDiagnostics.CreateRequestFailedExceptionAsync(message.Response).ConfigureAwait(false);
+            }
+        }
+
+        /// <summary> Lists acquired phone numbers. </summary>
+        /// <param name="cancellationToken"> The cancellation token to use. </param>
+        public Response<AcquiredPhoneNumbers> GetPhoneNumbers(CancellationToken cancellationToken = default)
+        {
+            using var message = CreateGetPhoneNumbersRequest();
+            _pipeline.Send(message, cancellationToken);
+            switch (message.Response.Status)
+            {
+                case 200:
+                    {
+                        AcquiredPhoneNumbers value = default;
+                        using var document = JsonDocument.Parse(message.Response.ContentStream);
+                        value = AcquiredPhoneNumbers.DeserializeAcquiredPhoneNumbers(document.RootElement);
+                        return Response.FromValue(value, message.Response);
+                    }
+                default:
+                    throw _clientDiagnostics.CreateRequestFailedException(message.Response);
+            }
+        }
+
+        internal HttpMessage CreateGetPhoneNumberRequest(string phoneNumber)
+        {
+            var message = _pipeline.CreateMessage();
+            var request = message.Request;
+            request.Method = RequestMethod.Get;
+            var uri = new RawRequestUriBuilder();
+            uri.AppendRaw(endpoint, false);
+            uri.AppendPath("/phoneNumbers/", false);
+            uri.AppendPath(phoneNumber, true);
+            uri.AppendQuery("api-version", "2020-07-20-preview1", true);
+            request.Uri = uri;
+            request.Headers.Add("Accept", "application/json");
+            return message;
+        }
+
+        /// <summary> Gets information about an acquired phone number. </summary>
+        /// <param name="phoneNumber"> The phone number id, this is the phone number in E.164 format without the leading +. </param>
+        /// <param name="cancellationToken"> The cancellation token to use. </param>
+        /// <exception cref="ArgumentNullException"> <paramref name="phoneNumber"/> is null. </exception>
+        public async Task<Response<AcquiredPhoneNumber>> GetPhoneNumberAsync(string phoneNumber, CancellationToken cancellationToken = default)
+        {
+            if (phoneNumber == null)
+            {
+                throw new ArgumentNullException(nameof(phoneNumber));
+            }
+
+            using var message = CreateGetPhoneNumberRequest(phoneNumber);
+            await _pipeline.SendAsync(message, cancellationToken).ConfigureAwait(false);
+            switch (message.Response.Status)
+            {
+                case 200:
+                    {
+                        AcquiredPhoneNumber value = default;
+                        using var document = await JsonDocument.ParseAsync(message.Response.ContentStream, default, cancellationToken).ConfigureAwait(false);
+                        value = AcquiredPhoneNumber.DeserializeAcquiredPhoneNumber(document.RootElement);
+                        return Response.FromValue(value, message.Response);
+                    }
+                default:
+                    throw await _clientDiagnostics.CreateRequestFailedExceptionAsync(message.Response).ConfigureAwait(false);
+            }
+        }
+
+        /// <summary> Gets information about an acquired phone number. </summary>
+        /// <param name="phoneNumber"> The phone number id, this is the phone number in E.164 format without the leading +. </param>
+        /// <param name="cancellationToken"> The cancellation token to use. </param>
+        /// <exception cref="ArgumentNullException"> <paramref name="phoneNumber"/> is null. </exception>
+        public Response<AcquiredPhoneNumber> GetPhoneNumber(string phoneNumber, CancellationToken cancellationToken = default)
+        {
+            if (phoneNumber == null)
+            {
+                throw new ArgumentNullException(nameof(phoneNumber));
+            }
+
+            using var message = CreateGetPhoneNumberRequest(phoneNumber);
+            _pipeline.Send(message, cancellationToken);
+            switch (message.Response.Status)
+            {
+                case 200:
+                    {
+                        AcquiredPhoneNumber value = default;
+                        using var document = JsonDocument.Parse(message.Response.ContentStream);
+                        value = AcquiredPhoneNumber.DeserializeAcquiredPhoneNumber(document.RootElement);
+                        return Response.FromValue(value, message.Response);
+                    }
+                default:
+                    throw _clientDiagnostics.CreateRequestFailedException(message.Response);
+            }
+        }
+
+        internal HttpMessage CreateUpdatePhoneNumberRequest(string phoneNumber, string callbackUrl, string applicationId, Capabilities capabilities)
         {
             var message = _pipeline.CreateMessage();
             var request = message.Request;
             request.Method = RequestMethod.Patch;
             var uri = new RawRequestUriBuilder();
             uri.AppendRaw(endpoint, false);
-            uri.AppendPath("/administration/phonenumbers/numberconfiguration/configure", false);
+            uri.AppendPath("/phoneNumbers/", false);
+            uri.AppendPath(phoneNumber, true);
             uri.AppendQuery("api-version", "2020-07-20-preview1", true);
             request.Uri = uri;
-            request.Headers.Add("Content-Type", "application/json");
+            request.Headers.Add("Content-Type", "application/merge-patch+json");
             request.Headers.Add("Accept", "application/json");
-            var model = new NumberConfiguration(pstnConfiguration, phoneNumber);
+            var model = new AcquiredPhoneNumberUpdate()
+            {
+                CallbackUrl = callbackUrl,
+                ApplicationId = applicationId,
+                Capabilities = capabilities
+            };
             var content = new Utf8JsonRequestContent();
             content.JsonWriter.WriteObjectValue(model);
             request.Content = content;
             return message;
         }
 
-        /// <summary> Endpoint for configuring a pstn number. </summary>
-        /// <param name="pstnConfiguration"> Definition for pstn number configuration. </param>
-        /// <param name="phoneNumber"> The phone number to configure. </param>
-        /// <param name="cancellationToken"> The cancellation token to use. </param>
-        /// <exception cref="ArgumentNullException"> <paramref name="pstnConfiguration"/> or <paramref name="phoneNumber"/> is null. </exception>
-        public async Task<Response> ConfigureNumberAsync(PstnConfiguration pstnConfiguration, string phoneNumber, CancellationToken cancellationToken = default)
-        {
-            if (pstnConfiguration == null)
-            {
-                throw new ArgumentNullException(nameof(pstnConfiguration));
-            }
-            if (phoneNumber == null)
-            {
-                throw new ArgumentNullException(nameof(phoneNumber));
-            }
-
-            using var message = CreateConfigureNumberRequest(pstnConfiguration, phoneNumber);
-            await _pipeline.SendAsync(message, cancellationToken).ConfigureAwait(false);
-            switch (message.Response.Status)
-            {
-                case 200:
-                    return message.Response;
-                default:
-                    throw await _clientDiagnostics.CreateRequestFailedExceptionAsync(message.Response).ConfigureAwait(false);
-            }
-        }
-
-        /// <summary> Endpoint for configuring a pstn number. </summary>
-        /// <param name="pstnConfiguration"> Definition for pstn number configuration. </param>
-        /// <param name="phoneNumber"> The phone number to configure. </param>
-        /// <param name="cancellationToken"> The cancellation token to use. </param>
-        /// <exception cref="ArgumentNullException"> <paramref name="pstnConfiguration"/> or <paramref name="phoneNumber"/> is null. </exception>
-        public Response ConfigureNumber(PstnConfiguration pstnConfiguration, string phoneNumber, CancellationToken cancellationToken = default)
-        {
-            if (pstnConfiguration == null)
-            {
-                throw new ArgumentNullException(nameof(pstnConfiguration));
-            }
-            if (phoneNumber == null)
-            {
-                throw new ArgumentNullException(nameof(phoneNumber));
-            }
-
-            using var message = CreateConfigureNumberRequest(pstnConfiguration, phoneNumber);
-            _pipeline.Send(message, cancellationToken);
-            switch (message.Response.Status)
-            {
-                case 200:
-                    return message.Response;
-                default:
-                    throw _clientDiagnostics.CreateRequestFailedException(message.Response);
-            }
-        }
-
-        internal HttpMessage CreateUnconfigureNumberRequest(string phoneNumber)
-        {
-            var message = _pipeline.CreateMessage();
-            var request = message.Request;
-            request.Method = RequestMethod.Patch;
-            var uri = new RawRequestUriBuilder();
-            uri.AppendRaw(endpoint, false);
-            uri.AppendPath("/administration/phonenumbers/numberconfiguration/unconfigure", false);
-            uri.AppendQuery("api-version", "2020-07-20-preview1", true);
-            request.Uri = uri;
-            request.Headers.Add("Content-Type", "application/json");
-            request.Headers.Add("Accept", "application/json");
-            var model = new NumberConfigurationPhoneNumber(phoneNumber);
-            var content = new Utf8JsonRequestContent();
-            content.JsonWriter.WriteObjectValue(model);
-            request.Content = content;
-            return message;
-        }
-
-        /// <summary> Endpoint for unconfiguring a pstn number by removing the configuration. </summary>
-        /// <param name="phoneNumber"> The phone number in the E.164 format. </param>
+        /// <summary> Update an acquired phone number. </summary>
+        /// <param name="phoneNumber"> The phone number id, this is the phone number in E.164 format without the leading +. </param>
+        /// <param name="callbackUrl"> The webhook URL for receiving incoming events. </param>
+        /// <param name="applicationId"> The application id the number has been assigned to. </param>
+        /// <param name="capabilities"> The new set of enabled capabilities. </param>
         /// <param name="cancellationToken"> The cancellation token to use. </param>
         /// <exception cref="ArgumentNullException"> <paramref name="phoneNumber"/> is null. </exception>
-        public async Task<Response> UnconfigureNumberAsync(string phoneNumber, CancellationToken cancellationToken = default)
+        public async Task<ResponseWithHeaders<PhoneNumberAdministrationUpdatePhoneNumberHeaders>> UpdatePhoneNumberAsync(string phoneNumber, string callbackUrl = null, string applicationId = null, Capabilities capabilities = null, CancellationToken cancellationToken = default)
         {
             if (phoneNumber == null)
             {
                 throw new ArgumentNullException(nameof(phoneNumber));
             }
 
-            using var message = CreateUnconfigureNumberRequest(phoneNumber);
+            using var message = CreateUpdatePhoneNumberRequest(phoneNumber, callbackUrl, applicationId, capabilities);
             await _pipeline.SendAsync(message, cancellationToken).ConfigureAwait(false);
+            var headers = new PhoneNumberAdministrationUpdatePhoneNumberHeaders(message.Response);
             switch (message.Response.Status)
             {
-                case 200:
-                    return message.Response;
+                case 202:
+                    return ResponseWithHeaders.FromValue(headers, message.Response);
                 default:
                     throw await _clientDiagnostics.CreateRequestFailedExceptionAsync(message.Response).ConfigureAwait(false);
             }
         }
 
-        /// <summary> Endpoint for unconfiguring a pstn number by removing the configuration. </summary>
-        /// <param name="phoneNumber"> The phone number in the E.164 format. </param>
+        /// <summary> Update an acquired phone number. </summary>
+        /// <param name="phoneNumber"> The phone number id, this is the phone number in E.164 format without the leading +. </param>
+        /// <param name="callbackUrl"> The webhook URL for receiving incoming events. </param>
+        /// <param name="applicationId"> The application id the number has been assigned to. </param>
+        /// <param name="capabilities"> The new set of enabled capabilities. </param>
         /// <param name="cancellationToken"> The cancellation token to use. </param>
         /// <exception cref="ArgumentNullException"> <paramref name="phoneNumber"/> is null. </exception>
-        public Response UnconfigureNumber(string phoneNumber, CancellationToken cancellationToken = default)
+        public ResponseWithHeaders<PhoneNumberAdministrationUpdatePhoneNumberHeaders> UpdatePhoneNumber(string phoneNumber, string callbackUrl = null, string applicationId = null, Capabilities capabilities = null, CancellationToken cancellationToken = default)
         {
             if (phoneNumber == null)
             {
                 throw new ArgumentNullException(nameof(phoneNumber));
             }
 
-            using var message = CreateUnconfigureNumberRequest(phoneNumber);
+            using var message = CreateUpdatePhoneNumberRequest(phoneNumber, callbackUrl, applicationId, capabilities);
             _pipeline.Send(message, cancellationToken);
-            switch (message.Response.Status)
-            {
-                case 200:
-                    return message.Response;
-                default:
-                    throw _clientDiagnostics.CreateRequestFailedException(message.Response);
-            }
-        }
-
-        internal HttpMessage CreateGetPhonePlanGroupsRequest(string countryCode, string locale, bool? includeRateInformation, int? skip, int? take)
-        {
-            var message = _pipeline.CreateMessage();
-            var request = message.Request;
-            request.Method = RequestMethod.Get;
-            var uri = new RawRequestUriBuilder();
-            uri.AppendRaw(endpoint, false);
-            uri.AppendPath("/administration/phonenumbers/countries/", false);
-            uri.AppendPath(countryCode, true);
-            uri.AppendPath("/phoneplangroups", false);
-            if (locale != null)
-            {
-                uri.AppendQuery("locale", locale, true);
-            }
-            if (includeRateInformation != null)
-            {
-                uri.AppendQuery("includeRateInformation", includeRateInformation.Value, true);
-            }
-            if (skip != null)
-            {
-                uri.AppendQuery("skip", skip.Value, true);
-            }
-            if (take != null)
-            {
-                uri.AppendQuery("take", take.Value, true);
-            }
-            uri.AppendQuery("api-version", "2020-07-20-preview1", true);
-            request.Uri = uri;
-            request.Headers.Add("Accept", "application/json");
-            return message;
-        }
-
-        /// <summary> Gets a list of phone plan groups for the given country. </summary>
-        /// <param name="countryCode"> The ISO 3166-2 country code. </param>
-        /// <param name="locale"> A language-locale pairing which will be used to localize the names of countries. </param>
-        /// <param name="includeRateInformation"> The Boolean to use. </param>
-        /// <param name="skip"> An optional parameter for how many entries to skip, for pagination purposes. </param>
-        /// <param name="take"> An optional parameter for how many entries to return, for pagination purposes. </param>
-        /// <param name="cancellationToken"> The cancellation token to use. </param>
-        /// <exception cref="ArgumentNullException"> <paramref name="countryCode"/> is null. </exception>
-        public async Task<Response<PhonePlanGroups>> GetPhonePlanGroupsAsync(string countryCode, string locale = null, bool? includeRateInformation = null, int? skip = null, int? take = null, CancellationToken cancellationToken = default)
-        {
-            if (countryCode == null)
-            {
-                throw new ArgumentNullException(nameof(countryCode));
-            }
-
-            using var message = CreateGetPhonePlanGroupsRequest(countryCode, locale, includeRateInformation, skip, take);
-            await _pipeline.SendAsync(message, cancellationToken).ConfigureAwait(false);
-            switch (message.Response.Status)
-            {
-                case 200:
-                    {
-                        PhonePlanGroups value = default;
-                        using var document = await JsonDocument.ParseAsync(message.Response.ContentStream, default, cancellationToken).ConfigureAwait(false);
-                        value = PhonePlanGroups.DeserializePhonePlanGroups(document.RootElement);
-                        return Response.FromValue(value, message.Response);
-                    }
-                default:
-                    throw await _clientDiagnostics.CreateRequestFailedExceptionAsync(message.Response).ConfigureAwait(false);
-            }
-        }
-
-        /// <summary> Gets a list of phone plan groups for the given country. </summary>
-        /// <param name="countryCode"> The ISO 3166-2 country code. </param>
-        /// <param name="locale"> A language-locale pairing which will be used to localize the names of countries. </param>
-        /// <param name="includeRateInformation"> The Boolean to use. </param>
-        /// <param name="skip"> An optional parameter for how many entries to skip, for pagination purposes. </param>
-        /// <param name="take"> An optional parameter for how many entries to return, for pagination purposes. </param>
-        /// <param name="cancellationToken"> The cancellation token to use. </param>
-        /// <exception cref="ArgumentNullException"> <paramref name="countryCode"/> is null. </exception>
-        public Response<PhonePlanGroups> GetPhonePlanGroups(string countryCode, string locale = null, bool? includeRateInformation = null, int? skip = null, int? take = null, CancellationToken cancellationToken = default)
-        {
-            if (countryCode == null)
-            {
-                throw new ArgumentNullException(nameof(countryCode));
-            }
-
-            using var message = CreateGetPhonePlanGroupsRequest(countryCode, locale, includeRateInformation, skip, take);
-            _pipeline.Send(message, cancellationToken);
-            switch (message.Response.Status)
-            {
-                case 200:
-                    {
-                        PhonePlanGroups value = default;
-                        using var document = JsonDocument.Parse(message.Response.ContentStream);
-                        value = PhonePlanGroups.DeserializePhonePlanGroups(document.RootElement);
-                        return Response.FromValue(value, message.Response);
-                    }
-                default:
-                    throw _clientDiagnostics.CreateRequestFailedException(message.Response);
-            }
-        }
-
-        internal HttpMessage CreateGetPhonePlansRequest(string countryCode, string phonePlanGroupId, string locale, int? skip, int? take)
-        {
-            var message = _pipeline.CreateMessage();
-            var request = message.Request;
-            request.Method = RequestMethod.Get;
-            var uri = new RawRequestUriBuilder();
-            uri.AppendRaw(endpoint, false);
-            uri.AppendPath("/administration/phonenumbers/countries/", false);
-            uri.AppendPath(countryCode, true);
-            uri.AppendPath("/phoneplangroups/", false);
-            uri.AppendPath(phonePlanGroupId, true);
-            uri.AppendPath("/phoneplans", false);
-            if (locale != null)
-            {
-                uri.AppendQuery("locale", locale, true);
-            }
-            if (skip != null)
-            {
-                uri.AppendQuery("skip", skip.Value, true);
-            }
-            if (take != null)
-            {
-                uri.AppendQuery("take", take.Value, true);
-            }
-            uri.AppendQuery("api-version", "2020-07-20-preview1", true);
-            request.Uri = uri;
-            request.Headers.Add("Accept", "application/json");
-            return message;
-        }
-
-        /// <summary> Gets a list of phone plans for a phone plan group. </summary>
-        /// <param name="countryCode"> The ISO 3166-2 country code. </param>
-        /// <param name="phonePlanGroupId"> The String to use. </param>
-        /// <param name="locale"> A language-locale pairing which will be used to localize the names of countries. </param>
-        /// <param name="skip"> An optional parameter for how many entries to skip, for pagination purposes. </param>
-        /// <param name="take"> An optional parameter for how many entries to return, for pagination purposes. </param>
-        /// <param name="cancellationToken"> The cancellation token to use. </param>
-        /// <exception cref="ArgumentNullException"> <paramref name="countryCode"/> or <paramref name="phonePlanGroupId"/> is null. </exception>
-        public async Task<Response<PhonePlansResponse>> GetPhonePlansAsync(string countryCode, string phonePlanGroupId, string locale = null, int? skip = null, int? take = null, CancellationToken cancellationToken = default)
-        {
-            if (countryCode == null)
-            {
-                throw new ArgumentNullException(nameof(countryCode));
-            }
-            if (phonePlanGroupId == null)
-            {
-                throw new ArgumentNullException(nameof(phonePlanGroupId));
-            }
-
-            using var message = CreateGetPhonePlansRequest(countryCode, phonePlanGroupId, locale, skip, take);
-            await _pipeline.SendAsync(message, cancellationToken).ConfigureAwait(false);
-            switch (message.Response.Status)
-            {
-                case 200:
-                    {
-                        PhonePlansResponse value = default;
-                        using var document = await JsonDocument.ParseAsync(message.Response.ContentStream, default, cancellationToken).ConfigureAwait(false);
-                        value = PhonePlansResponse.DeserializePhonePlansResponse(document.RootElement);
-                        return Response.FromValue(value, message.Response);
-                    }
-                default:
-                    throw await _clientDiagnostics.CreateRequestFailedExceptionAsync(message.Response).ConfigureAwait(false);
-            }
-        }
-
-        /// <summary> Gets a list of phone plans for a phone plan group. </summary>
-        /// <param name="countryCode"> The ISO 3166-2 country code. </param>
-        /// <param name="phonePlanGroupId"> The String to use. </param>
-        /// <param name="locale"> A language-locale pairing which will be used to localize the names of countries. </param>
-        /// <param name="skip"> An optional parameter for how many entries to skip, for pagination purposes. </param>
-        /// <param name="take"> An optional parameter for how many entries to return, for pagination purposes. </param>
-        /// <param name="cancellationToken"> The cancellation token to use. </param>
-        /// <exception cref="ArgumentNullException"> <paramref name="countryCode"/> or <paramref name="phonePlanGroupId"/> is null. </exception>
-        public Response<PhonePlansResponse> GetPhonePlans(string countryCode, string phonePlanGroupId, string locale = null, int? skip = null, int? take = null, CancellationToken cancellationToken = default)
-        {
-            if (countryCode == null)
-            {
-                throw new ArgumentNullException(nameof(countryCode));
-            }
-            if (phonePlanGroupId == null)
-            {
-                throw new ArgumentNullException(nameof(phonePlanGroupId));
-            }
-
-            using var message = CreateGetPhonePlansRequest(countryCode, phonePlanGroupId, locale, skip, take);
-            _pipeline.Send(message, cancellationToken);
-            switch (message.Response.Status)
-            {
-                case 200:
-                    {
-                        PhonePlansResponse value = default;
-                        using var document = JsonDocument.Parse(message.Response.ContentStream);
-                        value = PhonePlansResponse.DeserializePhonePlansResponse(document.RootElement);
-                        return Response.FromValue(value, message.Response);
-                    }
-                default:
-                    throw _clientDiagnostics.CreateRequestFailedException(message.Response);
-            }
-        }
-
-        internal HttpMessage CreateGetPhonePlanLocationOptionsRequest(string countryCode, string phonePlanGroupId, string phonePlanId, string locale)
-        {
-            var message = _pipeline.CreateMessage();
-            var request = message.Request;
-            request.Method = RequestMethod.Get;
-            var uri = new RawRequestUriBuilder();
-            uri.AppendRaw(endpoint, false);
-            uri.AppendPath("/administration/phonenumbers/countries/", false);
-            uri.AppendPath(countryCode, true);
-            uri.AppendPath("/phoneplangroups/", false);
-            uri.AppendPath(phonePlanGroupId, true);
-            uri.AppendPath("/phoneplans/", false);
-            uri.AppendPath(phonePlanId, true);
-            uri.AppendPath("/locationoptions", false);
-            if (locale != null)
-            {
-                uri.AppendQuery("locale", locale, true);
-            }
-            uri.AppendQuery("api-version", "2020-07-20-preview1", true);
-            request.Uri = uri;
-            request.Headers.Add("Accept", "application/json");
-            return message;
-        }
-
-        /// <summary> Gets a list of location options for a phone plan. </summary>
-        /// <param name="countryCode"> The ISO 3166-2 country code. </param>
-        /// <param name="phonePlanGroupId"> The String to use. </param>
-        /// <param name="phonePlanId"> The String to use. </param>
-        /// <param name="locale"> A language-locale pairing which will be used to localize the names of countries. </param>
-        /// <param name="cancellationToken"> The cancellation token to use. </param>
-        /// <exception cref="ArgumentNullException"> <paramref name="countryCode"/>, <paramref name="phonePlanGroupId"/>, or <paramref name="phonePlanId"/> is null. </exception>
-        public async Task<Response<LocationOptionsResponse>> GetPhonePlanLocationOptionsAsync(string countryCode, string phonePlanGroupId, string phonePlanId, string locale = null, CancellationToken cancellationToken = default)
-        {
-            if (countryCode == null)
-            {
-                throw new ArgumentNullException(nameof(countryCode));
-            }
-            if (phonePlanGroupId == null)
-            {
-                throw new ArgumentNullException(nameof(phonePlanGroupId));
-            }
-            if (phonePlanId == null)
-            {
-                throw new ArgumentNullException(nameof(phonePlanId));
-            }
-
-            using var message = CreateGetPhonePlanLocationOptionsRequest(countryCode, phonePlanGroupId, phonePlanId, locale);
-            await _pipeline.SendAsync(message, cancellationToken).ConfigureAwait(false);
-            switch (message.Response.Status)
-            {
-                case 200:
-                    {
-                        LocationOptionsResponse value = default;
-                        using var document = await JsonDocument.ParseAsync(message.Response.ContentStream, default, cancellationToken).ConfigureAwait(false);
-                        value = LocationOptionsResponse.DeserializeLocationOptionsResponse(document.RootElement);
-                        return Response.FromValue(value, message.Response);
-                    }
-                default:
-                    throw await _clientDiagnostics.CreateRequestFailedExceptionAsync(message.Response).ConfigureAwait(false);
-            }
-        }
-
-        /// <summary> Gets a list of location options for a phone plan. </summary>
-        /// <param name="countryCode"> The ISO 3166-2 country code. </param>
-        /// <param name="phonePlanGroupId"> The String to use. </param>
-        /// <param name="phonePlanId"> The String to use. </param>
-        /// <param name="locale"> A language-locale pairing which will be used to localize the names of countries. </param>
-        /// <param name="cancellationToken"> The cancellation token to use. </param>
-        /// <exception cref="ArgumentNullException"> <paramref name="countryCode"/>, <paramref name="phonePlanGroupId"/>, or <paramref name="phonePlanId"/> is null. </exception>
-        public Response<LocationOptionsResponse> GetPhonePlanLocationOptions(string countryCode, string phonePlanGroupId, string phonePlanId, string locale = null, CancellationToken cancellationToken = default)
-        {
-            if (countryCode == null)
-            {
-                throw new ArgumentNullException(nameof(countryCode));
-            }
-            if (phonePlanGroupId == null)
-            {
-                throw new ArgumentNullException(nameof(phonePlanGroupId));
-            }
-            if (phonePlanId == null)
-            {
-                throw new ArgumentNullException(nameof(phonePlanId));
-            }
-
-            using var message = CreateGetPhonePlanLocationOptionsRequest(countryCode, phonePlanGroupId, phonePlanId, locale);
-            _pipeline.Send(message, cancellationToken);
-            switch (message.Response.Status)
-            {
-                case 200:
-                    {
-                        LocationOptionsResponse value = default;
-                        using var document = JsonDocument.Parse(message.Response.ContentStream);
-                        value = LocationOptionsResponse.DeserializeLocationOptionsResponse(document.RootElement);
-                        return Response.FromValue(value, message.Response);
-                    }
-                default:
-                    throw _clientDiagnostics.CreateRequestFailedException(message.Response);
-            }
-        }
-
-        internal HttpMessage CreateGetReleaseByIdRequest(string releaseId)
-        {
-            var message = _pipeline.CreateMessage();
-            var request = message.Request;
-            request.Method = RequestMethod.Get;
-            var uri = new RawRequestUriBuilder();
-            uri.AppendRaw(endpoint, false);
-            uri.AppendPath("/administration/phonenumbers/releases/", false);
-            uri.AppendPath(releaseId, true);
-            uri.AppendQuery("api-version", "2020-07-20-preview1", true);
-            request.Uri = uri;
-            request.Headers.Add("Accept", "application/json");
-            return message;
-        }
-
-        /// <summary> Gets a release by a release id. </summary>
-        /// <param name="releaseId"> Represents the release id. </param>
-        /// <param name="cancellationToken"> The cancellation token to use. </param>
-        /// <exception cref="ArgumentNullException"> <paramref name="releaseId"/> is null. </exception>
-        public async Task<Response<PhoneNumberRelease>> GetReleaseByIdAsync(string releaseId, CancellationToken cancellationToken = default)
-        {
-            if (releaseId == null)
-            {
-                throw new ArgumentNullException(nameof(releaseId));
-            }
-
-            using var message = CreateGetReleaseByIdRequest(releaseId);
-            await _pipeline.SendAsync(message, cancellationToken).ConfigureAwait(false);
-            switch (message.Response.Status)
-            {
-                case 200:
-                    {
-                        PhoneNumberRelease value = default;
-                        using var document = await JsonDocument.ParseAsync(message.Response.ContentStream, default, cancellationToken).ConfigureAwait(false);
-                        value = PhoneNumberRelease.DeserializePhoneNumberRelease(document.RootElement);
-                        return Response.FromValue(value, message.Response);
-                    }
-                default:
-                    throw await _clientDiagnostics.CreateRequestFailedExceptionAsync(message.Response).ConfigureAwait(false);
-            }
-        }
-
-        /// <summary> Gets a release by a release id. </summary>
-        /// <param name="releaseId"> Represents the release id. </param>
-        /// <param name="cancellationToken"> The cancellation token to use. </param>
-        /// <exception cref="ArgumentNullException"> <paramref name="releaseId"/> is null. </exception>
-        public Response<PhoneNumberRelease> GetReleaseById(string releaseId, CancellationToken cancellationToken = default)
-        {
-            if (releaseId == null)
-            {
-                throw new ArgumentNullException(nameof(releaseId));
-            }
-
-            using var message = CreateGetReleaseByIdRequest(releaseId);
-            _pipeline.Send(message, cancellationToken);
-            switch (message.Response.Status)
-            {
-                case 200:
-                    {
-                        PhoneNumberRelease value = default;
-                        using var document = JsonDocument.Parse(message.Response.ContentStream);
-                        value = PhoneNumberRelease.DeserializePhoneNumberRelease(document.RootElement);
-                        return Response.FromValue(value, message.Response);
-                    }
-                default:
-                    throw _clientDiagnostics.CreateRequestFailedException(message.Response);
-            }
-        }
-
-        internal HttpMessage CreateReleasePhoneNumbersRequest(IEnumerable<string> phoneNumbers)
-        {
-            var message = _pipeline.CreateMessage();
-            var request = message.Request;
-            request.Method = RequestMethod.Post;
-            var uri = new RawRequestUriBuilder();
-            uri.AppendRaw(endpoint, false);
-            uri.AppendPath("/administration/phonenumbers/releases", false);
-            uri.AppendQuery("api-version", "2020-07-20-preview1", true);
-            request.Uri = uri;
-            request.Headers.Add("Content-Type", "application/json");
-            request.Headers.Add("Accept", "application/json");
-            var model = new ReleaseRequest(phoneNumbers);
-            var content = new Utf8JsonRequestContent();
-            content.JsonWriter.WriteObjectValue(model);
-            request.Content = content;
-            return message;
-        }
-
-        /// <summary> Creates a release for the given phone numbers. </summary>
-        /// <param name="phoneNumbers"> The list of phone numbers in the release request. </param>
-        /// <param name="cancellationToken"> The cancellation token to use. </param>
-        /// <exception cref="ArgumentNullException"> <paramref name="phoneNumbers"/> is null. </exception>
-        public async Task<Response<PhoneNumberReleaseResponse>> ReleasePhoneNumbersAsync(IEnumerable<string> phoneNumbers, CancellationToken cancellationToken = default)
-        {
-            if (phoneNumbers == null)
-            {
-                throw new ArgumentNullException(nameof(phoneNumbers));
-            }
-
-            using var message = CreateReleasePhoneNumbersRequest(phoneNumbers);
-            await _pipeline.SendAsync(message, cancellationToken).ConfigureAwait(false);
-            switch (message.Response.Status)
-            {
-                case 200:
-                    {
-                        PhoneNumberReleaseResponse value = default;
-                        using var document = await JsonDocument.ParseAsync(message.Response.ContentStream, default, cancellationToken).ConfigureAwait(false);
-                        value = PhoneNumberReleaseResponse.DeserializePhoneNumberReleaseResponse(document.RootElement);
-                        return Response.FromValue(value, message.Response);
-                    }
-                default:
-                    throw await _clientDiagnostics.CreateRequestFailedExceptionAsync(message.Response).ConfigureAwait(false);
-            }
-        }
-
-        /// <summary> Creates a release for the given phone numbers. </summary>
-        /// <param name="phoneNumbers"> The list of phone numbers in the release request. </param>
-        /// <param name="cancellationToken"> The cancellation token to use. </param>
-        /// <exception cref="ArgumentNullException"> <paramref name="phoneNumbers"/> is null. </exception>
-        public Response<PhoneNumberReleaseResponse> ReleasePhoneNumbers(IEnumerable<string> phoneNumbers, CancellationToken cancellationToken = default)
-        {
-            if (phoneNumbers == null)
-            {
-                throw new ArgumentNullException(nameof(phoneNumbers));
-            }
-
-            using var message = CreateReleasePhoneNumbersRequest(phoneNumbers);
-            _pipeline.Send(message, cancellationToken);
-            switch (message.Response.Status)
-            {
-                case 200:
-                    {
-                        PhoneNumberReleaseResponse value = default;
-                        using var document = JsonDocument.Parse(message.Response.ContentStream);
-                        value = PhoneNumberReleaseResponse.DeserializePhoneNumberReleaseResponse(document.RootElement);
-                        return Response.FromValue(value, message.Response);
-                    }
-                default:
-                    throw _clientDiagnostics.CreateRequestFailedException(message.Response);
-            }
-        }
-
-        internal HttpMessage CreateGetAllReleasesRequest(int? skip, int? take)
-        {
-            var message = _pipeline.CreateMessage();
-            var request = message.Request;
-            request.Method = RequestMethod.Get;
-            var uri = new RawRequestUriBuilder();
-            uri.AppendRaw(endpoint, false);
-            uri.AppendPath("/administration/phonenumbers/releases", false);
-            if (skip != null)
-            {
-                uri.AppendQuery("skip", skip.Value, true);
-            }
-            if (take != null)
-            {
-                uri.AppendQuery("take", take.Value, true);
-            }
-            uri.AppendQuery("api-version", "2020-07-20-preview1", true);
-            request.Uri = uri;
-            request.Headers.Add("Accept", "application/json");
-            return message;
-        }
-
-        /// <summary> Gets a list of all releases. </summary>
-        /// <param name="skip"> An optional parameter for how many entries to skip, for pagination purposes. </param>
-        /// <param name="take"> An optional parameter for how many entries to return, for pagination purposes. </param>
-        /// <param name="cancellationToken"> The cancellation token to use. </param>
-        public async Task<Response<PhoneNumberEntities>> GetAllReleasesAsync(int? skip = null, int? take = null, CancellationToken cancellationToken = default)
-        {
-            using var message = CreateGetAllReleasesRequest(skip, take);
-            await _pipeline.SendAsync(message, cancellationToken).ConfigureAwait(false);
-            switch (message.Response.Status)
-            {
-                case 200:
-                    {
-                        PhoneNumberEntities value = default;
-                        using var document = await JsonDocument.ParseAsync(message.Response.ContentStream, default, cancellationToken).ConfigureAwait(false);
-                        value = PhoneNumberEntities.DeserializePhoneNumberEntities(document.RootElement);
-                        return Response.FromValue(value, message.Response);
-                    }
-                default:
-                    throw await _clientDiagnostics.CreateRequestFailedExceptionAsync(message.Response).ConfigureAwait(false);
-            }
-        }
-
-        /// <summary> Gets a list of all releases. </summary>
-        /// <param name="skip"> An optional parameter for how many entries to skip, for pagination purposes. </param>
-        /// <param name="take"> An optional parameter for how many entries to return, for pagination purposes. </param>
-        /// <param name="cancellationToken"> The cancellation token to use. </param>
-        public Response<PhoneNumberEntities> GetAllReleases(int? skip = null, int? take = null, CancellationToken cancellationToken = default)
-        {
-            using var message = CreateGetAllReleasesRequest(skip, take);
-            _pipeline.Send(message, cancellationToken);
-            switch (message.Response.Status)
-            {
-                case 200:
-                    {
-                        PhoneNumberEntities value = default;
-                        using var document = JsonDocument.Parse(message.Response.ContentStream);
-                        value = PhoneNumberEntities.DeserializePhoneNumberEntities(document.RootElement);
-                        return Response.FromValue(value, message.Response);
-                    }
-                default:
-                    throw _clientDiagnostics.CreateRequestFailedException(message.Response);
-            }
-        }
-
-        internal HttpMessage CreateGetSearchByIdRequest(string searchId)
-        {
-            var message = _pipeline.CreateMessage();
-            var request = message.Request;
-            request.Method = RequestMethod.Get;
-            var uri = new RawRequestUriBuilder();
-            uri.AppendRaw(endpoint, false);
-            uri.AppendPath("/administration/phonenumbers/searches/", false);
-            uri.AppendPath(searchId, true);
-            uri.AppendQuery("api-version", "2020-07-20-preview1", true);
-            request.Uri = uri;
-            request.Headers.Add("Accept", "application/json");
-            return message;
-        }
-
-        /// <summary> Get search by search id. </summary>
-        /// <param name="searchId"> The search id to be searched for. </param>
-        /// <param name="cancellationToken"> The cancellation token to use. </param>
-        /// <exception cref="ArgumentNullException"> <paramref name="searchId"/> is null. </exception>
-        public async Task<Response<PhoneNumberReservation>> GetSearchByIdAsync(string searchId, CancellationToken cancellationToken = default)
-        {
-            if (searchId == null)
-            {
-                throw new ArgumentNullException(nameof(searchId));
-            }
-
-            using var message = CreateGetSearchByIdRequest(searchId);
-            await _pipeline.SendAsync(message, cancellationToken).ConfigureAwait(false);
-            switch (message.Response.Status)
-            {
-                case 200:
-                    {
-                        PhoneNumberReservation value = default;
-                        using var document = await JsonDocument.ParseAsync(message.Response.ContentStream, default, cancellationToken).ConfigureAwait(false);
-                        value = PhoneNumberReservation.DeserializePhoneNumberReservation(document.RootElement);
-                        return Response.FromValue(value, message.Response);
-                    }
-                default:
-                    throw await _clientDiagnostics.CreateRequestFailedExceptionAsync(message.Response).ConfigureAwait(false);
-            }
-        }
-
-        /// <summary> Get search by search id. </summary>
-        /// <param name="searchId"> The search id to be searched for. </param>
-        /// <param name="cancellationToken"> The cancellation token to use. </param>
-        /// <exception cref="ArgumentNullException"> <paramref name="searchId"/> is null. </exception>
-        public Response<PhoneNumberReservation> GetSearchById(string searchId, CancellationToken cancellationToken = default)
-        {
-            if (searchId == null)
-            {
-                throw new ArgumentNullException(nameof(searchId));
-            }
-
-            using var message = CreateGetSearchByIdRequest(searchId);
-            _pipeline.Send(message, cancellationToken);
-            switch (message.Response.Status)
-            {
-                case 200:
-                    {
-                        PhoneNumberReservation value = default;
-                        using var document = JsonDocument.Parse(message.Response.ContentStream);
-                        value = PhoneNumberReservation.DeserializePhoneNumberReservation(document.RootElement);
-                        return Response.FromValue(value, message.Response);
-                    }
-                default:
-                    throw _clientDiagnostics.CreateRequestFailedException(message.Response);
-            }
-        }
-
-        internal HttpMessage CreateCreateSearchRequest(CreateReservationOptions body)
-        {
-            var message = _pipeline.CreateMessage();
-            var request = message.Request;
-            request.Method = RequestMethod.Post;
-            var uri = new RawRequestUriBuilder();
-            uri.AppendRaw(endpoint, false);
-            uri.AppendPath("/administration/phonenumbers/searches", false);
-            uri.AppendQuery("api-version", "2020-07-20-preview1", true);
-            request.Uri = uri;
-            request.Headers.Add("Content-Type", "application/json");
-            request.Headers.Add("Accept", "application/json");
-            if (body != null)
-            {
-                var content = new Utf8JsonRequestContent();
-                content.JsonWriter.WriteObjectValue(body);
-                request.Content = content;
-            }
-            return message;
-        }
-
-        /// <summary> Creates a phone number search. </summary>
-        /// <param name="body"> Defines the search options. </param>
-        /// <param name="cancellationToken"> The cancellation token to use. </param>
-        public async Task<Response<CreateReservationResponse>> CreateSearchAsync(CreateReservationOptions body = null, CancellationToken cancellationToken = default)
-        {
-            using var message = CreateCreateSearchRequest(body);
-            await _pipeline.SendAsync(message, cancellationToken).ConfigureAwait(false);
-            switch (message.Response.Status)
-            {
-                case 201:
-                    {
-                        CreateReservationResponse value = default;
-                        using var document = await JsonDocument.ParseAsync(message.Response.ContentStream, default, cancellationToken).ConfigureAwait(false);
-                        value = CreateReservationResponse.DeserializeCreateReservationResponse(document.RootElement);
-                        return Response.FromValue(value, message.Response);
-                    }
-                default:
-                    throw await _clientDiagnostics.CreateRequestFailedExceptionAsync(message.Response).ConfigureAwait(false);
-            }
-        }
-
-        /// <summary> Creates a phone number search. </summary>
-        /// <param name="body"> Defines the search options. </param>
-        /// <param name="cancellationToken"> The cancellation token to use. </param>
-        public Response<CreateReservationResponse> CreateSearch(CreateReservationOptions body = null, CancellationToken cancellationToken = default)
-        {
-            using var message = CreateCreateSearchRequest(body);
-            _pipeline.Send(message, cancellationToken);
-            switch (message.Response.Status)
-            {
-                case 201:
-                    {
-                        CreateReservationResponse value = default;
-                        using var document = JsonDocument.Parse(message.Response.ContentStream);
-                        value = CreateReservationResponse.DeserializeCreateReservationResponse(document.RootElement);
-                        return Response.FromValue(value, message.Response);
-                    }
-                default:
-                    throw _clientDiagnostics.CreateRequestFailedException(message.Response);
-            }
-        }
-
-        internal HttpMessage CreateGetAllSearchesRequest(int? skip, int? take)
-        {
-            var message = _pipeline.CreateMessage();
-            var request = message.Request;
-            request.Method = RequestMethod.Get;
-            var uri = new RawRequestUriBuilder();
-            uri.AppendRaw(endpoint, false);
-            uri.AppendPath("/administration/phonenumbers/searches", false);
-            if (skip != null)
-            {
-                uri.AppendQuery("skip", skip.Value, true);
-            }
-            if (take != null)
-            {
-                uri.AppendQuery("take", take.Value, true);
-            }
-            uri.AppendQuery("api-version", "2020-07-20-preview1", true);
-            request.Uri = uri;
-            request.Headers.Add("Accept", "application/json");
-            return message;
-        }
-
-        /// <summary> Gets a list of all searches. </summary>
-        /// <param name="skip"> An optional parameter for how many entries to skip, for pagination purposes. </param>
-        /// <param name="take"> An optional parameter for how many entries to return, for pagination purposes. </param>
-        /// <param name="cancellationToken"> The cancellation token to use. </param>
-        public async Task<Response<PhoneNumberEntities>> GetAllSearchesAsync(int? skip = null, int? take = null, CancellationToken cancellationToken = default)
-        {
-            using var message = CreateGetAllSearchesRequest(skip, take);
-            await _pipeline.SendAsync(message, cancellationToken).ConfigureAwait(false);
-            switch (message.Response.Status)
-            {
-                case 200:
-                    {
-                        PhoneNumberEntities value = default;
-                        using var document = await JsonDocument.ParseAsync(message.Response.ContentStream, default, cancellationToken).ConfigureAwait(false);
-                        value = PhoneNumberEntities.DeserializePhoneNumberEntities(document.RootElement);
-                        return Response.FromValue(value, message.Response);
-                    }
-                default:
-                    throw await _clientDiagnostics.CreateRequestFailedExceptionAsync(message.Response).ConfigureAwait(false);
-            }
-        }
-
-        /// <summary> Gets a list of all searches. </summary>
-        /// <param name="skip"> An optional parameter for how many entries to skip, for pagination purposes. </param>
-        /// <param name="take"> An optional parameter for how many entries to return, for pagination purposes. </param>
-        /// <param name="cancellationToken"> The cancellation token to use. </param>
-        public Response<PhoneNumberEntities> GetAllSearches(int? skip = null, int? take = null, CancellationToken cancellationToken = default)
-        {
-            using var message = CreateGetAllSearchesRequest(skip, take);
-            _pipeline.Send(message, cancellationToken);
-            switch (message.Response.Status)
-            {
-                case 200:
-                    {
-                        PhoneNumberEntities value = default;
-                        using var document = JsonDocument.Parse(message.Response.ContentStream);
-                        value = PhoneNumberEntities.DeserializePhoneNumberEntities(document.RootElement);
-                        return Response.FromValue(value, message.Response);
-                    }
-                default:
-                    throw _clientDiagnostics.CreateRequestFailedException(message.Response);
-            }
-        }
-
-        internal HttpMessage CreateCancelSearchRequest(string searchId)
-        {
-            var message = _pipeline.CreateMessage();
-            var request = message.Request;
-            request.Method = RequestMethod.Post;
-            var uri = new RawRequestUriBuilder();
-            uri.AppendRaw(endpoint, false);
-            uri.AppendPath("/administration/phonenumbers/searches/", false);
-            uri.AppendPath(searchId, true);
-            uri.AppendPath("/cancel", false);
-            uri.AppendQuery("api-version", "2020-07-20-preview1", true);
-            request.Uri = uri;
-            request.Headers.Add("Accept", "application/json");
-            return message;
-        }
-
-        /// <summary> Cancels the search. This means existing numbers in the search will be made available. </summary>
-        /// <param name="searchId"> The search id to be canceled. </param>
-        /// <param name="cancellationToken"> The cancellation token to use. </param>
-        /// <exception cref="ArgumentNullException"> <paramref name="searchId"/> is null. </exception>
-        public async Task<Response> CancelSearchAsync(string searchId, CancellationToken cancellationToken = default)
-        {
-            if (searchId == null)
-            {
-                throw new ArgumentNullException(nameof(searchId));
-            }
-
-            using var message = CreateCancelSearchRequest(searchId);
-            await _pipeline.SendAsync(message, cancellationToken).ConfigureAwait(false);
+            var headers = new PhoneNumberAdministrationUpdatePhoneNumberHeaders(message.Response);
             switch (message.Response.Status)
             {
                 case 202:
-                    return message.Response;
-                default:
-                    throw await _clientDiagnostics.CreateRequestFailedExceptionAsync(message.Response).ConfigureAwait(false);
-            }
-        }
-
-        /// <summary> Cancels the search. This means existing numbers in the search will be made available. </summary>
-        /// <param name="searchId"> The search id to be canceled. </param>
-        /// <param name="cancellationToken"> The cancellation token to use. </param>
-        /// <exception cref="ArgumentNullException"> <paramref name="searchId"/> is null. </exception>
-        public Response CancelSearch(string searchId, CancellationToken cancellationToken = default)
-        {
-            if (searchId == null)
-            {
-                throw new ArgumentNullException(nameof(searchId));
-            }
-
-            using var message = CreateCancelSearchRequest(searchId);
-            _pipeline.Send(message, cancellationToken);
-            switch (message.Response.Status)
-            {
-                case 202:
-                    return message.Response;
+                    return ResponseWithHeaders.FromValue(headers, message.Response);
                 default:
                     throw _clientDiagnostics.CreateRequestFailedException(message.Response);
             }
         }
 
-        internal HttpMessage CreatePurchaseSearchRequest(string searchId)
+        internal HttpMessage CreateReleasePhoneNumberRequest(string phoneNumber)
         {
             var message = _pipeline.CreateMessage();
             var request = message.Request;
-            request.Method = RequestMethod.Post;
+            request.Method = RequestMethod.Delete;
             var uri = new RawRequestUriBuilder();
             uri.AppendRaw(endpoint, false);
-            uri.AppendPath("/administration/phonenumbers/searches/", false);
-            uri.AppendPath(searchId, true);
-            uri.AppendPath("/purchase", false);
+            uri.AppendPath("/phoneNumbers/", false);
+            uri.AppendPath(phoneNumber, true);
             uri.AppendQuery("api-version", "2020-07-20-preview1", true);
             request.Uri = uri;
             request.Headers.Add("Accept", "application/json");
             return message;
         }
 
-        /// <summary> Purchases the phone number search. </summary>
-        /// <param name="searchId"> The search id to be purchased. </param>
+        /// <summary> Releases an acquired phone number. </summary>
+        /// <param name="phoneNumber"> The phone number id, this is the phone number in E.164 format without the leading +. </param>
         /// <param name="cancellationToken"> The cancellation token to use. </param>
-        /// <exception cref="ArgumentNullException"> <paramref name="searchId"/> is null. </exception>
-        public async Task<Response> PurchaseSearchAsync(string searchId, CancellationToken cancellationToken = default)
+        /// <exception cref="ArgumentNullException"> <paramref name="phoneNumber"/> is null. </exception>
+        public async Task<ResponseWithHeaders<PhoneNumberAdministrationReleasePhoneNumberHeaders>> ReleasePhoneNumberAsync(string phoneNumber, CancellationToken cancellationToken = default)
         {
-            if (searchId == null)
+            if (phoneNumber == null)
             {
-                throw new ArgumentNullException(nameof(searchId));
+                throw new ArgumentNullException(nameof(phoneNumber));
             }
 
-            using var message = CreatePurchaseSearchRequest(searchId);
+            using var message = CreateReleasePhoneNumberRequest(phoneNumber);
             await _pipeline.SendAsync(message, cancellationToken).ConfigureAwait(false);
+            var headers = new PhoneNumberAdministrationReleasePhoneNumberHeaders(message.Response);
             switch (message.Response.Status)
             {
                 case 202:
-                    return message.Response;
+                    return ResponseWithHeaders.FromValue(headers, message.Response);
                 default:
                     throw await _clientDiagnostics.CreateRequestFailedExceptionAsync(message.Response).ConfigureAwait(false);
             }
         }
 
-        /// <summary> Purchases the phone number search. </summary>
-        /// <param name="searchId"> The search id to be purchased. </param>
+        /// <summary> Releases an acquired phone number. </summary>
+        /// <param name="phoneNumber"> The phone number id, this is the phone number in E.164 format without the leading +. </param>
         /// <param name="cancellationToken"> The cancellation token to use. </param>
-        /// <exception cref="ArgumentNullException"> <paramref name="searchId"/> is null. </exception>
-        public Response PurchaseSearch(string searchId, CancellationToken cancellationToken = default)
+        /// <exception cref="ArgumentNullException"> <paramref name="phoneNumber"/> is null. </exception>
+        public ResponseWithHeaders<PhoneNumberAdministrationReleasePhoneNumberHeaders> ReleasePhoneNumber(string phoneNumber, CancellationToken cancellationToken = default)
         {
-            if (searchId == null)
+            if (phoneNumber == null)
             {
-                throw new ArgumentNullException(nameof(searchId));
+                throw new ArgumentNullException(nameof(phoneNumber));
             }
 
-            using var message = CreatePurchaseSearchRequest(searchId);
+            using var message = CreateReleasePhoneNumberRequest(phoneNumber);
             _pipeline.Send(message, cancellationToken);
+            var headers = new PhoneNumberAdministrationReleasePhoneNumberHeaders(message.Response);
             switch (message.Response.Status)
             {
                 case 202:
-                    return message.Response;
-                default:
-                    throw _clientDiagnostics.CreateRequestFailedException(message.Response);
-            }
-        }
-
-        internal HttpMessage CreateGetAllPhoneNumbersNextPageRequest(string nextLink, string locale, int? skip, int? take)
-        {
-            var message = _pipeline.CreateMessage();
-            var request = message.Request;
-            request.Method = RequestMethod.Get;
-            var uri = new RawRequestUriBuilder();
-            uri.AppendRaw(endpoint, false);
-            uri.AppendRawNextLink(nextLink, false);
-            request.Uri = uri;
-            request.Headers.Add("Accept", "application/json");
-            return message;
-        }
-
-        /// <summary> Gets the list of the acquired phone numbers. </summary>
-        /// <param name="nextLink"> The URL to the next page of results. </param>
-        /// <param name="locale"> A language-locale pairing which will be used to localize the names of countries. </param>
-        /// <param name="skip"> An optional parameter for how many entries to skip, for pagination purposes. </param>
-        /// <param name="take"> An optional parameter for how many entries to return, for pagination purposes. </param>
-        /// <param name="cancellationToken"> The cancellation token to use. </param>
-        /// <exception cref="ArgumentNullException"> <paramref name="nextLink"/> is null. </exception>
-        public async Task<Response<AcquiredPhoneNumbers>> GetAllPhoneNumbersNextPageAsync(string nextLink, string locale = null, int? skip = null, int? take = null, CancellationToken cancellationToken = default)
-        {
-            if (nextLink == null)
-            {
-                throw new ArgumentNullException(nameof(nextLink));
-            }
-
-            using var message = CreateGetAllPhoneNumbersNextPageRequest(nextLink, locale, skip, take);
-            await _pipeline.SendAsync(message, cancellationToken).ConfigureAwait(false);
-            switch (message.Response.Status)
-            {
-                case 200:
-                    {
-                        AcquiredPhoneNumbers value = default;
-                        using var document = await JsonDocument.ParseAsync(message.Response.ContentStream, default, cancellationToken).ConfigureAwait(false);
-                        value = AcquiredPhoneNumbers.DeserializeAcquiredPhoneNumbers(document.RootElement);
-                        return Response.FromValue(value, message.Response);
-                    }
-                default:
-                    throw await _clientDiagnostics.CreateRequestFailedExceptionAsync(message.Response).ConfigureAwait(false);
-            }
-        }
-
-        /// <summary> Gets the list of the acquired phone numbers. </summary>
-        /// <param name="nextLink"> The URL to the next page of results. </param>
-        /// <param name="locale"> A language-locale pairing which will be used to localize the names of countries. </param>
-        /// <param name="skip"> An optional parameter for how many entries to skip, for pagination purposes. </param>
-        /// <param name="take"> An optional parameter for how many entries to return, for pagination purposes. </param>
-        /// <param name="cancellationToken"> The cancellation token to use. </param>
-        /// <exception cref="ArgumentNullException"> <paramref name="nextLink"/> is null. </exception>
-        public Response<AcquiredPhoneNumbers> GetAllPhoneNumbersNextPage(string nextLink, string locale = null, int? skip = null, int? take = null, CancellationToken cancellationToken = default)
-        {
-            if (nextLink == null)
-            {
-                throw new ArgumentNullException(nameof(nextLink));
-            }
-
-            using var message = CreateGetAllPhoneNumbersNextPageRequest(nextLink, locale, skip, take);
-            _pipeline.Send(message, cancellationToken);
-            switch (message.Response.Status)
-            {
-                case 200:
-                    {
-                        AcquiredPhoneNumbers value = default;
-                        using var document = JsonDocument.Parse(message.Response.ContentStream);
-                        value = AcquiredPhoneNumbers.DeserializeAcquiredPhoneNumbers(document.RootElement);
-                        return Response.FromValue(value, message.Response);
-                    }
-                default:
-                    throw _clientDiagnostics.CreateRequestFailedException(message.Response);
-            }
-        }
-
-        internal HttpMessage CreateGetAllSupportedCountriesNextPageRequest(string nextLink, string locale, int? skip, int? take)
-        {
-            var message = _pipeline.CreateMessage();
-            var request = message.Request;
-            request.Method = RequestMethod.Get;
-            var uri = new RawRequestUriBuilder();
-            uri.AppendRaw(endpoint, false);
-            uri.AppendRawNextLink(nextLink, false);
-            request.Uri = uri;
-            request.Headers.Add("Accept", "application/json");
-            return message;
-        }
-
-        /// <summary> Gets a list of supported countries. </summary>
-        /// <param name="nextLink"> The URL to the next page of results. </param>
-        /// <param name="locale"> A language-locale pairing which will be used to localize the names of countries. </param>
-        /// <param name="skip"> An optional parameter for how many entries to skip, for pagination purposes. </param>
-        /// <param name="take"> An optional parameter for how many entries to return, for pagination purposes. </param>
-        /// <param name="cancellationToken"> The cancellation token to use. </param>
-        /// <exception cref="ArgumentNullException"> <paramref name="nextLink"/> is null. </exception>
-        public async Task<Response<PhoneNumberCountries>> GetAllSupportedCountriesNextPageAsync(string nextLink, string locale = null, int? skip = null, int? take = null, CancellationToken cancellationToken = default)
-        {
-            if (nextLink == null)
-            {
-                throw new ArgumentNullException(nameof(nextLink));
-            }
-
-            using var message = CreateGetAllSupportedCountriesNextPageRequest(nextLink, locale, skip, take);
-            await _pipeline.SendAsync(message, cancellationToken).ConfigureAwait(false);
-            switch (message.Response.Status)
-            {
-                case 200:
-                    {
-                        PhoneNumberCountries value = default;
-                        using var document = await JsonDocument.ParseAsync(message.Response.ContentStream, default, cancellationToken).ConfigureAwait(false);
-                        value = PhoneNumberCountries.DeserializePhoneNumberCountries(document.RootElement);
-                        return Response.FromValue(value, message.Response);
-                    }
-                default:
-                    throw await _clientDiagnostics.CreateRequestFailedExceptionAsync(message.Response).ConfigureAwait(false);
-            }
-        }
-
-        /// <summary> Gets a list of supported countries. </summary>
-        /// <param name="nextLink"> The URL to the next page of results. </param>
-        /// <param name="locale"> A language-locale pairing which will be used to localize the names of countries. </param>
-        /// <param name="skip"> An optional parameter for how many entries to skip, for pagination purposes. </param>
-        /// <param name="take"> An optional parameter for how many entries to return, for pagination purposes. </param>
-        /// <param name="cancellationToken"> The cancellation token to use. </param>
-        /// <exception cref="ArgumentNullException"> <paramref name="nextLink"/> is null. </exception>
-        public Response<PhoneNumberCountries> GetAllSupportedCountriesNextPage(string nextLink, string locale = null, int? skip = null, int? take = null, CancellationToken cancellationToken = default)
-        {
-            if (nextLink == null)
-            {
-                throw new ArgumentNullException(nameof(nextLink));
-            }
-
-            using var message = CreateGetAllSupportedCountriesNextPageRequest(nextLink, locale, skip, take);
-            _pipeline.Send(message, cancellationToken);
-            switch (message.Response.Status)
-            {
-                case 200:
-                    {
-                        PhoneNumberCountries value = default;
-                        using var document = JsonDocument.Parse(message.Response.ContentStream);
-                        value = PhoneNumberCountries.DeserializePhoneNumberCountries(document.RootElement);
-                        return Response.FromValue(value, message.Response);
-                    }
-                default:
-                    throw _clientDiagnostics.CreateRequestFailedException(message.Response);
-            }
-        }
-
-        internal HttpMessage CreateGetPhonePlanGroupsNextPageRequest(string nextLink, string countryCode, string locale, bool? includeRateInformation, int? skip, int? take)
-        {
-            var message = _pipeline.CreateMessage();
-            var request = message.Request;
-            request.Method = RequestMethod.Get;
-            var uri = new RawRequestUriBuilder();
-            uri.AppendRaw(endpoint, false);
-            uri.AppendRawNextLink(nextLink, false);
-            request.Uri = uri;
-            request.Headers.Add("Accept", "application/json");
-            return message;
-        }
-
-        /// <summary> Gets a list of phone plan groups for the given country. </summary>
-        /// <param name="nextLink"> The URL to the next page of results. </param>
-        /// <param name="countryCode"> The ISO 3166-2 country code. </param>
-        /// <param name="locale"> A language-locale pairing which will be used to localize the names of countries. </param>
-        /// <param name="includeRateInformation"> The Boolean to use. </param>
-        /// <param name="skip"> An optional parameter for how many entries to skip, for pagination purposes. </param>
-        /// <param name="take"> An optional parameter for how many entries to return, for pagination purposes. </param>
-        /// <param name="cancellationToken"> The cancellation token to use. </param>
-        /// <exception cref="ArgumentNullException"> <paramref name="nextLink"/> or <paramref name="countryCode"/> is null. </exception>
-        public async Task<Response<PhonePlanGroups>> GetPhonePlanGroupsNextPageAsync(string nextLink, string countryCode, string locale = null, bool? includeRateInformation = null, int? skip = null, int? take = null, CancellationToken cancellationToken = default)
-        {
-            if (nextLink == null)
-            {
-                throw new ArgumentNullException(nameof(nextLink));
-            }
-            if (countryCode == null)
-            {
-                throw new ArgumentNullException(nameof(countryCode));
-            }
-
-            using var message = CreateGetPhonePlanGroupsNextPageRequest(nextLink, countryCode, locale, includeRateInformation, skip, take);
-            await _pipeline.SendAsync(message, cancellationToken).ConfigureAwait(false);
-            switch (message.Response.Status)
-            {
-                case 200:
-                    {
-                        PhonePlanGroups value = default;
-                        using var document = await JsonDocument.ParseAsync(message.Response.ContentStream, default, cancellationToken).ConfigureAwait(false);
-                        value = PhonePlanGroups.DeserializePhonePlanGroups(document.RootElement);
-                        return Response.FromValue(value, message.Response);
-                    }
-                default:
-                    throw await _clientDiagnostics.CreateRequestFailedExceptionAsync(message.Response).ConfigureAwait(false);
-            }
-        }
-
-        /// <summary> Gets a list of phone plan groups for the given country. </summary>
-        /// <param name="nextLink"> The URL to the next page of results. </param>
-        /// <param name="countryCode"> The ISO 3166-2 country code. </param>
-        /// <param name="locale"> A language-locale pairing which will be used to localize the names of countries. </param>
-        /// <param name="includeRateInformation"> The Boolean to use. </param>
-        /// <param name="skip"> An optional parameter for how many entries to skip, for pagination purposes. </param>
-        /// <param name="take"> An optional parameter for how many entries to return, for pagination purposes. </param>
-        /// <param name="cancellationToken"> The cancellation token to use. </param>
-        /// <exception cref="ArgumentNullException"> <paramref name="nextLink"/> or <paramref name="countryCode"/> is null. </exception>
-        public Response<PhonePlanGroups> GetPhonePlanGroupsNextPage(string nextLink, string countryCode, string locale = null, bool? includeRateInformation = null, int? skip = null, int? take = null, CancellationToken cancellationToken = default)
-        {
-            if (nextLink == null)
-            {
-                throw new ArgumentNullException(nameof(nextLink));
-            }
-            if (countryCode == null)
-            {
-                throw new ArgumentNullException(nameof(countryCode));
-            }
-
-            using var message = CreateGetPhonePlanGroupsNextPageRequest(nextLink, countryCode, locale, includeRateInformation, skip, take);
-            _pipeline.Send(message, cancellationToken);
-            switch (message.Response.Status)
-            {
-                case 200:
-                    {
-                        PhonePlanGroups value = default;
-                        using var document = JsonDocument.Parse(message.Response.ContentStream);
-                        value = PhonePlanGroups.DeserializePhonePlanGroups(document.RootElement);
-                        return Response.FromValue(value, message.Response);
-                    }
-                default:
-                    throw _clientDiagnostics.CreateRequestFailedException(message.Response);
-            }
-        }
-
-        internal HttpMessage CreateGetPhonePlansNextPageRequest(string nextLink, string countryCode, string phonePlanGroupId, string locale, int? skip, int? take)
-        {
-            var message = _pipeline.CreateMessage();
-            var request = message.Request;
-            request.Method = RequestMethod.Get;
-            var uri = new RawRequestUriBuilder();
-            uri.AppendRaw(endpoint, false);
-            uri.AppendRawNextLink(nextLink, false);
-            request.Uri = uri;
-            request.Headers.Add("Accept", "application/json");
-            return message;
-        }
-
-        /// <summary> Gets a list of phone plans for a phone plan group. </summary>
-        /// <param name="nextLink"> The URL to the next page of results. </param>
-        /// <param name="countryCode"> The ISO 3166-2 country code. </param>
-        /// <param name="phonePlanGroupId"> The String to use. </param>
-        /// <param name="locale"> A language-locale pairing which will be used to localize the names of countries. </param>
-        /// <param name="skip"> An optional parameter for how many entries to skip, for pagination purposes. </param>
-        /// <param name="take"> An optional parameter for how many entries to return, for pagination purposes. </param>
-        /// <param name="cancellationToken"> The cancellation token to use. </param>
-        /// <exception cref="ArgumentNullException"> <paramref name="nextLink"/>, <paramref name="countryCode"/>, or <paramref name="phonePlanGroupId"/> is null. </exception>
-        public async Task<Response<PhonePlansResponse>> GetPhonePlansNextPageAsync(string nextLink, string countryCode, string phonePlanGroupId, string locale = null, int? skip = null, int? take = null, CancellationToken cancellationToken = default)
-        {
-            if (nextLink == null)
-            {
-                throw new ArgumentNullException(nameof(nextLink));
-            }
-            if (countryCode == null)
-            {
-                throw new ArgumentNullException(nameof(countryCode));
-            }
-            if (phonePlanGroupId == null)
-            {
-                throw new ArgumentNullException(nameof(phonePlanGroupId));
-            }
-
-            using var message = CreateGetPhonePlansNextPageRequest(nextLink, countryCode, phonePlanGroupId, locale, skip, take);
-            await _pipeline.SendAsync(message, cancellationToken).ConfigureAwait(false);
-            switch (message.Response.Status)
-            {
-                case 200:
-                    {
-                        PhonePlansResponse value = default;
-                        using var document = await JsonDocument.ParseAsync(message.Response.ContentStream, default, cancellationToken).ConfigureAwait(false);
-                        value = PhonePlansResponse.DeserializePhonePlansResponse(document.RootElement);
-                        return Response.FromValue(value, message.Response);
-                    }
-                default:
-                    throw await _clientDiagnostics.CreateRequestFailedExceptionAsync(message.Response).ConfigureAwait(false);
-            }
-        }
-
-        /// <summary> Gets a list of phone plans for a phone plan group. </summary>
-        /// <param name="nextLink"> The URL to the next page of results. </param>
-        /// <param name="countryCode"> The ISO 3166-2 country code. </param>
-        /// <param name="phonePlanGroupId"> The String to use. </param>
-        /// <param name="locale"> A language-locale pairing which will be used to localize the names of countries. </param>
-        /// <param name="skip"> An optional parameter for how many entries to skip, for pagination purposes. </param>
-        /// <param name="take"> An optional parameter for how many entries to return, for pagination purposes. </param>
-        /// <param name="cancellationToken"> The cancellation token to use. </param>
-        /// <exception cref="ArgumentNullException"> <paramref name="nextLink"/>, <paramref name="countryCode"/>, or <paramref name="phonePlanGroupId"/> is null. </exception>
-        public Response<PhonePlansResponse> GetPhonePlansNextPage(string nextLink, string countryCode, string phonePlanGroupId, string locale = null, int? skip = null, int? take = null, CancellationToken cancellationToken = default)
-        {
-            if (nextLink == null)
-            {
-                throw new ArgumentNullException(nameof(nextLink));
-            }
-            if (countryCode == null)
-            {
-                throw new ArgumentNullException(nameof(countryCode));
-            }
-            if (phonePlanGroupId == null)
-            {
-                throw new ArgumentNullException(nameof(phonePlanGroupId));
-            }
-
-            using var message = CreateGetPhonePlansNextPageRequest(nextLink, countryCode, phonePlanGroupId, locale, skip, take);
-            _pipeline.Send(message, cancellationToken);
-            switch (message.Response.Status)
-            {
-                case 200:
-                    {
-                        PhonePlansResponse value = default;
-                        using var document = JsonDocument.Parse(message.Response.ContentStream);
-                        value = PhonePlansResponse.DeserializePhonePlansResponse(document.RootElement);
-                        return Response.FromValue(value, message.Response);
-                    }
-                default:
-                    throw _clientDiagnostics.CreateRequestFailedException(message.Response);
-            }
-        }
-
-        internal HttpMessage CreateGetAllReleasesNextPageRequest(string nextLink, int? skip, int? take)
-        {
-            var message = _pipeline.CreateMessage();
-            var request = message.Request;
-            request.Method = RequestMethod.Get;
-            var uri = new RawRequestUriBuilder();
-            uri.AppendRaw(endpoint, false);
-            uri.AppendRawNextLink(nextLink, false);
-            request.Uri = uri;
-            request.Headers.Add("Accept", "application/json");
-            return message;
-        }
-
-        /// <summary> Gets a list of all releases. </summary>
-        /// <param name="nextLink"> The URL to the next page of results. </param>
-        /// <param name="skip"> An optional parameter for how many entries to skip, for pagination purposes. </param>
-        /// <param name="take"> An optional parameter for how many entries to return, for pagination purposes. </param>
-        /// <param name="cancellationToken"> The cancellation token to use. </param>
-        /// <exception cref="ArgumentNullException"> <paramref name="nextLink"/> is null. </exception>
-        public async Task<Response<PhoneNumberEntities>> GetAllReleasesNextPageAsync(string nextLink, int? skip = null, int? take = null, CancellationToken cancellationToken = default)
-        {
-            if (nextLink == null)
-            {
-                throw new ArgumentNullException(nameof(nextLink));
-            }
-
-            using var message = CreateGetAllReleasesNextPageRequest(nextLink, skip, take);
-            await _pipeline.SendAsync(message, cancellationToken).ConfigureAwait(false);
-            switch (message.Response.Status)
-            {
-                case 200:
-                    {
-                        PhoneNumberEntities value = default;
-                        using var document = await JsonDocument.ParseAsync(message.Response.ContentStream, default, cancellationToken).ConfigureAwait(false);
-                        value = PhoneNumberEntities.DeserializePhoneNumberEntities(document.RootElement);
-                        return Response.FromValue(value, message.Response);
-                    }
-                default:
-                    throw await _clientDiagnostics.CreateRequestFailedExceptionAsync(message.Response).ConfigureAwait(false);
-            }
-        }
-
-        /// <summary> Gets a list of all releases. </summary>
-        /// <param name="nextLink"> The URL to the next page of results. </param>
-        /// <param name="skip"> An optional parameter for how many entries to skip, for pagination purposes. </param>
-        /// <param name="take"> An optional parameter for how many entries to return, for pagination purposes. </param>
-        /// <param name="cancellationToken"> The cancellation token to use. </param>
-        /// <exception cref="ArgumentNullException"> <paramref name="nextLink"/> is null. </exception>
-        public Response<PhoneNumberEntities> GetAllReleasesNextPage(string nextLink, int? skip = null, int? take = null, CancellationToken cancellationToken = default)
-        {
-            if (nextLink == null)
-            {
-                throw new ArgumentNullException(nameof(nextLink));
-            }
-
-            using var message = CreateGetAllReleasesNextPageRequest(nextLink, skip, take);
-            _pipeline.Send(message, cancellationToken);
-            switch (message.Response.Status)
-            {
-                case 200:
-                    {
-                        PhoneNumberEntities value = default;
-                        using var document = JsonDocument.Parse(message.Response.ContentStream);
-                        value = PhoneNumberEntities.DeserializePhoneNumberEntities(document.RootElement);
-                        return Response.FromValue(value, message.Response);
-                    }
-                default:
-                    throw _clientDiagnostics.CreateRequestFailedException(message.Response);
-            }
-        }
-
-        internal HttpMessage CreateGetAllSearchesNextPageRequest(string nextLink, int? skip, int? take)
-        {
-            var message = _pipeline.CreateMessage();
-            var request = message.Request;
-            request.Method = RequestMethod.Get;
-            var uri = new RawRequestUriBuilder();
-            uri.AppendRaw(endpoint, false);
-            uri.AppendRawNextLink(nextLink, false);
-            request.Uri = uri;
-            request.Headers.Add("Accept", "application/json");
-            return message;
-        }
-
-        /// <summary> Gets a list of all searches. </summary>
-        /// <param name="nextLink"> The URL to the next page of results. </param>
-        /// <param name="skip"> An optional parameter for how many entries to skip, for pagination purposes. </param>
-        /// <param name="take"> An optional parameter for how many entries to return, for pagination purposes. </param>
-        /// <param name="cancellationToken"> The cancellation token to use. </param>
-        /// <exception cref="ArgumentNullException"> <paramref name="nextLink"/> is null. </exception>
-        public async Task<Response<PhoneNumberEntities>> GetAllSearchesNextPageAsync(string nextLink, int? skip = null, int? take = null, CancellationToken cancellationToken = default)
-        {
-            if (nextLink == null)
-            {
-                throw new ArgumentNullException(nameof(nextLink));
-            }
-
-            using var message = CreateGetAllSearchesNextPageRequest(nextLink, skip, take);
-            await _pipeline.SendAsync(message, cancellationToken).ConfigureAwait(false);
-            switch (message.Response.Status)
-            {
-                case 200:
-                    {
-                        PhoneNumberEntities value = default;
-                        using var document = await JsonDocument.ParseAsync(message.Response.ContentStream, default, cancellationToken).ConfigureAwait(false);
-                        value = PhoneNumberEntities.DeserializePhoneNumberEntities(document.RootElement);
-                        return Response.FromValue(value, message.Response);
-                    }
-                default:
-                    throw await _clientDiagnostics.CreateRequestFailedExceptionAsync(message.Response).ConfigureAwait(false);
-            }
-        }
-
-        /// <summary> Gets a list of all searches. </summary>
-        /// <param name="nextLink"> The URL to the next page of results. </param>
-        /// <param name="skip"> An optional parameter for how many entries to skip, for pagination purposes. </param>
-        /// <param name="take"> An optional parameter for how many entries to return, for pagination purposes. </param>
-        /// <param name="cancellationToken"> The cancellation token to use. </param>
-        /// <exception cref="ArgumentNullException"> <paramref name="nextLink"/> is null. </exception>
-        public Response<PhoneNumberEntities> GetAllSearchesNextPage(string nextLink, int? skip = null, int? take = null, CancellationToken cancellationToken = default)
-        {
-            if (nextLink == null)
-            {
-                throw new ArgumentNullException(nameof(nextLink));
-            }
-
-            using var message = CreateGetAllSearchesNextPageRequest(nextLink, skip, take);
-            _pipeline.Send(message, cancellationToken);
-            switch (message.Response.Status)
-            {
-                case 200:
-                    {
-                        PhoneNumberEntities value = default;
-                        using var document = JsonDocument.Parse(message.Response.ContentStream);
-                        value = PhoneNumberEntities.DeserializePhoneNumberEntities(document.RootElement);
-                        return Response.FromValue(value, message.Response);
-                    }
+                    return ResponseWithHeaders.FromValue(headers, message.Response);
                 default:
                     throw _clientDiagnostics.CreateRequestFailedException(message.Response);
             }

@@ -14,7 +14,7 @@ namespace Azure.Communication.Administration.Models
     {
         /// <summary> Initializes a new instance of PhoneNumberCountry. </summary>
         /// <param name="localizedName"> Represents the name of the country. </param>
-        /// <param name="countryCode"> Represents the abbreviated name of the country. </param>
+        /// <param name="countryCode"> The ISO 3166-2 country code. </param>
         /// <exception cref="ArgumentNullException"> <paramref name="localizedName"/> or <paramref name="countryCode"/> is null. </exception>
         internal PhoneNumberCountry(string localizedName, string countryCode)
         {
@@ -31,9 +31,22 @@ namespace Azure.Communication.Administration.Models
             CountryCode = countryCode;
         }
 
+        /// <summary> Initializes a new instance of PhoneNumberCountry. </summary>
+        /// <param name="localizedName"> Represents the name of the country. </param>
+        /// <param name="locale"> Locale used for localization. </param>
+        /// <param name="countryCode"> The ISO 3166-2 country code. </param>
+        internal PhoneNumberCountry(string localizedName, string locale, string countryCode)
+        {
+            LocalizedName = localizedName;
+            Locale = locale;
+            CountryCode = countryCode;
+        }
+
         /// <summary> Represents the name of the country. </summary>
         public string LocalizedName { get; }
-        /// <summary> Represents the abbreviated name of the country. </summary>
+        /// <summary> Locale used for localization. </summary>
+        public string Locale { get; }
+        /// <summary> The ISO 3166-2 country code. </summary>
         public string CountryCode { get; }
     }
 }

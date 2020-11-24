@@ -6,67 +6,60 @@
 #nullable disable
 
 using System;
-using System.Collections.Generic;
-using System.Linq;
 
 namespace Azure.Communication.Administration.Models
 {
-    /// <summary> Represents an acquired phone number. </summary>
+    /// <summary> The acquired phone number and its metadata and configuration. </summary>
     public partial class AcquiredPhoneNumber
     {
         /// <summary> Initializes a new instance of AcquiredPhoneNumber. </summary>
-        /// <param name="phoneNumber"> String of the E.164 format of the phone number. </param>
-        /// <param name="acquiredCapabilities"> The set of all acquired capabilities of the phone number. </param>
-        /// <param name="availableCapabilities"> The set of all available capabilities that can be acquired for this phone number. </param>
-        /// <exception cref="ArgumentNullException"> <paramref name="phoneNumber"/>, <paramref name="acquiredCapabilities"/>, or <paramref name="availableCapabilities"/> is null. </exception>
-        internal AcquiredPhoneNumber(string phoneNumber, IEnumerable<PhoneNumberCapability> acquiredCapabilities, IEnumerable<PhoneNumberCapability> availableCapabilities)
+        internal AcquiredPhoneNumber()
         {
-            if (phoneNumber == null)
-            {
-                throw new ArgumentNullException(nameof(phoneNumber));
-            }
-            if (acquiredCapabilities == null)
-            {
-                throw new ArgumentNullException(nameof(acquiredCapabilities));
-            }
-            if (availableCapabilities == null)
-            {
-                throw new ArgumentNullException(nameof(availableCapabilities));
-            }
-
-            PhoneNumber = phoneNumber;
-            AcquiredCapabilities = acquiredCapabilities.ToList();
-            AvailableCapabilities = availableCapabilities.ToList();
         }
 
         /// <summary> Initializes a new instance of AcquiredPhoneNumber. </summary>
-        /// <param name="phoneNumber"> String of the E.164 format of the phone number. </param>
-        /// <param name="acquiredCapabilities"> The set of all acquired capabilities of the phone number. </param>
-        /// <param name="availableCapabilities"> The set of all available capabilities that can be acquired for this phone number. </param>
-        /// <param name="assignmentStatus"> The assignment status of the phone number. Conveys what type of entity the number is assigned to. </param>
-        /// <param name="placeName"> The name of the place of the phone number. </param>
-        /// <param name="activationState"> The activation state of the phone number. Can be &quot;Activated&quot;, &quot;AssignmentPending&quot;, &quot;AssignmentFailed&quot;, &quot;UpdatePending&quot;, &quot;UpdateFailed&quot;. </param>
-        internal AcquiredPhoneNumber(string phoneNumber, IReadOnlyList<PhoneNumberCapability> acquiredCapabilities, IReadOnlyList<PhoneNumberCapability> availableCapabilities, AssignmentStatus? assignmentStatus, string placeName, ActivationState? activationState)
+        /// <param name="id"> The id, which is the phone number in E.164 format without the leading +. </param>
+        /// <param name="phoneNumber"> The phoneNumber in E.164 format. </param>
+        /// <param name="countryCode"> The ISO 3166-2 country code of the country that the phone number belongs to. </param>
+        /// <param name="numberType"> The type of the phone number. </param>
+        /// <param name="assignmentType"> The assignment type of the phone number, people or application. </param>
+        /// <param name="purchaseDate"> . </param>
+        /// <param name="capabilities"> The phone number&apos;s capabilities. </param>
+        /// <param name="callbackUrl"> The webhook URL for receiving incoming events. </param>
+        /// <param name="applicationId"> The application id the number has been assigned to. </param>
+        /// <param name="monthlyRate"> The monthly cost of the phone number. </param>
+        internal AcquiredPhoneNumber(string id, string phoneNumber, string countryCode, PhoneNumberType? numberType, AssignmentType? assignmentType, DateTimeOffset? purchaseDate, Capabilities capabilities, string callbackUrl, string applicationId, MonthlyRate monthlyRate)
         {
+            Id = id;
             PhoneNumber = phoneNumber;
-            AcquiredCapabilities = acquiredCapabilities;
-            AvailableCapabilities = availableCapabilities;
-            AssignmentStatus = assignmentStatus;
-            PlaceName = placeName;
-            ActivationState = activationState;
+            CountryCode = countryCode;
+            NumberType = numberType;
+            AssignmentType = assignmentType;
+            PurchaseDate = purchaseDate;
+            Capabilities = capabilities;
+            CallbackUrl = callbackUrl;
+            ApplicationId = applicationId;
+            MonthlyRate = monthlyRate;
         }
 
-        /// <summary> String of the E.164 format of the phone number. </summary>
+        /// <summary> The id, which is the phone number in E.164 format without the leading +. </summary>
+        public string Id { get; }
+        /// <summary> The phoneNumber in E.164 format. </summary>
         public string PhoneNumber { get; }
-        /// <summary> The set of all acquired capabilities of the phone number. </summary>
-        public IReadOnlyList<PhoneNumberCapability> AcquiredCapabilities { get; }
-        /// <summary> The set of all available capabilities that can be acquired for this phone number. </summary>
-        public IReadOnlyList<PhoneNumberCapability> AvailableCapabilities { get; }
-        /// <summary> The assignment status of the phone number. Conveys what type of entity the number is assigned to. </summary>
-        public AssignmentStatus? AssignmentStatus { get; }
-        /// <summary> The name of the place of the phone number. </summary>
-        public string PlaceName { get; }
-        /// <summary> The activation state of the phone number. Can be &quot;Activated&quot;, &quot;AssignmentPending&quot;, &quot;AssignmentFailed&quot;, &quot;UpdatePending&quot;, &quot;UpdateFailed&quot;. </summary>
-        public ActivationState? ActivationState { get; }
+        /// <summary> The ISO 3166-2 country code of the country that the phone number belongs to. </summary>
+        public string CountryCode { get; }
+        /// <summary> The type of the phone number. </summary>
+        public PhoneNumberType? NumberType { get; }
+        /// <summary> The assignment type of the phone number, people or application. </summary>
+        public AssignmentType? AssignmentType { get; }
+        public DateTimeOffset? PurchaseDate { get; }
+        /// <summary> The phone number&apos;s capabilities. </summary>
+        public Capabilities Capabilities { get; }
+        /// <summary> The webhook URL for receiving incoming events. </summary>
+        public string CallbackUrl { get; }
+        /// <summary> The application id the number has been assigned to. </summary>
+        public string ApplicationId { get; }
+        /// <summary> The monthly cost of the phone number. </summary>
+        public MonthlyRate MonthlyRate { get; }
     }
 }

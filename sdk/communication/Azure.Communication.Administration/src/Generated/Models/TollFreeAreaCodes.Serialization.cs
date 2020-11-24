@@ -11,22 +11,27 @@ using Azure.Core;
 
 namespace Azure.Communication.Administration.Models
 {
-    public partial class AcquiredPhoneNumbers
+    public partial class TollFreeAreaCodes
     {
-        internal static AcquiredPhoneNumbers DeserializeAcquiredPhoneNumbers(JsonElement element)
+        internal static TollFreeAreaCodes DeserializeTollFreeAreaCodes(JsonElement element)
         {
-            IReadOnlyList<AcquiredPhoneNumber> phoneNumbers = default;
+            Optional<IReadOnlyList<string>> areaCodes = default;
             Optional<string> nextLink = default;
             foreach (var property in element.EnumerateObject())
             {
-                if (property.NameEquals("phoneNumbers"))
+                if (property.NameEquals("areaCodes"))
                 {
-                    List<AcquiredPhoneNumber> array = new List<AcquiredPhoneNumber>();
+                    if (property.Value.ValueKind == JsonValueKind.Null)
+                    {
+                        property.ThrowNonNullablePropertyIsNull();
+                        continue;
+                    }
+                    List<string> array = new List<string>();
                     foreach (var item in property.Value.EnumerateArray())
                     {
-                        array.Add(AcquiredPhoneNumber.DeserializeAcquiredPhoneNumber(item));
+                        array.Add(item.GetString());
                     }
-                    phoneNumbers = array;
+                    areaCodes = array;
                     continue;
                 }
                 if (property.NameEquals("nextLink"))
@@ -35,7 +40,7 @@ namespace Azure.Communication.Administration.Models
                     continue;
                 }
             }
-            return new AcquiredPhoneNumbers(phoneNumbers, nextLink.Value);
+            return new TollFreeAreaCodes(Optional.ToList(areaCodes), nextLink.Value);
         }
     }
 }

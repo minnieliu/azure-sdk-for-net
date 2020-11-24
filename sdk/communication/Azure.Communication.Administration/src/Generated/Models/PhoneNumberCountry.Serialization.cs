@@ -15,6 +15,7 @@ namespace Azure.Communication.Administration.Models
         internal static PhoneNumberCountry DeserializePhoneNumberCountry(JsonElement element)
         {
             string localizedName = default;
+            Optional<string> locale = default;
             string countryCode = default;
             foreach (var property in element.EnumerateObject())
             {
@@ -23,13 +24,18 @@ namespace Azure.Communication.Administration.Models
                     localizedName = property.Value.GetString();
                     continue;
                 }
+                if (property.NameEquals("locale"))
+                {
+                    locale = property.Value.GetString();
+                    continue;
+                }
                 if (property.NameEquals("countryCode"))
                 {
                     countryCode = property.Value.GetString();
                     continue;
                 }
             }
-            return new PhoneNumberCountry(localizedName, countryCode);
+            return new PhoneNumberCountry(localizedName, locale.Value, countryCode);
         }
     }
 }

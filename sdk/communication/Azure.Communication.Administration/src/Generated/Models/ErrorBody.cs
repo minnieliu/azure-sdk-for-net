@@ -8,7 +8,7 @@
 namespace Azure.Communication.Administration.Models
 {
     /// <summary> Represents a service error response body. </summary>
-    internal partial class ErrorBody
+    public partial class ErrorBody
     {
         /// <summary> Initializes a new instance of ErrorBody. </summary>
         internal ErrorBody()

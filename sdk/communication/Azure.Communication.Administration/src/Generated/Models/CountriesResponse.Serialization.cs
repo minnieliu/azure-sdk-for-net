@@ -11,22 +11,27 @@ using Azure.Core;
 
 namespace Azure.Communication.Administration.Models
 {
-    public partial class AcquiredPhoneNumbers
+    public partial class CountriesResponse
     {
-        internal static AcquiredPhoneNumbers DeserializeAcquiredPhoneNumbers(JsonElement element)
+        internal static CountriesResponse DeserializeCountriesResponse(JsonElement element)
         {
-            IReadOnlyList<AcquiredPhoneNumber> phoneNumbers = default;
+            Optional<IReadOnlyList<PhoneNumberCountry>> countries = default;
             Optional<string> nextLink = default;
             foreach (var property in element.EnumerateObject())
             {
-                if (property.NameEquals("phoneNumbers"))
+                if (property.NameEquals("countries"))
                 {
-                    List<AcquiredPhoneNumber> array = new List<AcquiredPhoneNumber>();
+                    if (property.Value.ValueKind == JsonValueKind.Null)
+                    {
+                        property.ThrowNonNullablePropertyIsNull();
+                        continue;
+                    }
+                    List<PhoneNumberCountry> array = new List<PhoneNumberCountry>();
                     foreach (var item in property.Value.EnumerateArray())
                     {
-                        array.Add(AcquiredPhoneNumber.DeserializeAcquiredPhoneNumber(item));
+                        array.Add(PhoneNumberCountry.DeserializePhoneNumberCountry(item));
                     }
-                    phoneNumbers = array;
+                    countries = array;
                     continue;
                 }
                 if (property.NameEquals("nextLink"))
@@ -35,7 +40,7 @@ namespace Azure.Communication.Administration.Models
                     continue;
                 }
             }
-            return new AcquiredPhoneNumbers(phoneNumbers, nextLink.Value);
+            return new CountriesResponse(Optional.ToList(countries), nextLink.Value);
         }
     }
 }

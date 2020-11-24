@@ -10,7 +10,7 @@ using Azure.Core;
 
 namespace Azure.Communication.Administration.Models
 {
-    internal partial class ErrorBody
+    public partial class ErrorBody
     {
         internal static ErrorBody DeserializeErrorBody(JsonElement element)
         {
