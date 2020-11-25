@@ -7,7 +7,7 @@
 
 using System;
 using System.Collections.Generic;
-using Azure.Core;
+using System.Linq;
 
 namespace Azure.Communication.Administration.Models
 {
@@ -15,9 +15,36 @@ namespace Azure.Communication.Administration.Models
     public partial class SearchResult
     {
         /// <summary> Initializes a new instance of SearchResult. </summary>
-        internal SearchResult()
+        /// <param name="id"> The search id. </param>
+        /// <param name="phoneNumbers"> The phone numbers that are available. Can be fewer than the desired search quantity. </param>
+        /// <param name="numberType"> The phoner number type. </param>
+        /// <param name="assignmentType"> The phone number&apos;s assignment type. </param>
+        /// <param name="capabilities"> The phone number&apos;s capabilities. </param>
+        /// <param name="monthlyRate"> The monthly cost for an individual phone number. </param>
+        /// <param name="searchExpiresBy"> The date that this search result expires and phone numbers are no longer on hold. A search result expires in less than 15min. </param>
+        /// <exception cref="ArgumentNullException"> <paramref name="id"/>, <paramref name="phoneNumbers"/>, or <paramref name="monthlyRate"/> is null. </exception>
+        internal SearchResult(string id, IEnumerable<string> phoneNumbers, PhoneNumberType numberType, AssignmentType assignmentType, PhoneNumberCapabilities capabilities, MonthlyRate monthlyRate, DateTimeOffset searchExpiresBy)
         {
-            PhoneNumbers = new ChangeTrackingList<string>();
+            if (id == null)
+            {
+                throw new ArgumentNullException(nameof(id));
+            }
+            if (phoneNumbers == null)
+            {
+                throw new ArgumentNullException(nameof(phoneNumbers));
+            }
+            if (monthlyRate == null)
+            {
+                throw new ArgumentNullException(nameof(monthlyRate));
+            }
+
+            Id = id;
+            PhoneNumbers = phoneNumbers.ToList();
+            NumberType = numberType;
+            AssignmentType = assignmentType;
+            Capabilities = capabilities;
+            MonthlyRate = monthlyRate;
+            SearchExpiresBy = searchExpiresBy;
         }
 
         /// <summary> Initializes a new instance of SearchResult. </summary>
@@ -28,7 +55,7 @@ namespace Azure.Communication.Administration.Models
         /// <param name="capabilities"> The phone number&apos;s capabilities. </param>
         /// <param name="monthlyRate"> The monthly cost for an individual phone number. </param>
         /// <param name="searchExpiresBy"> The date that this search result expires and phone numbers are no longer on hold. A search result expires in less than 15min. </param>
-        internal SearchResult(string id, IReadOnlyList<string> phoneNumbers, PhoneNumberType? numberType, AssignmentType? assignmentType, Capabilities capabilities, MonthlyRate monthlyRate, DateTimeOffset? searchExpiresBy)
+        internal SearchResult(string id, IReadOnlyList<string> phoneNumbers, PhoneNumberType numberType, AssignmentType assignmentType, PhoneNumberCapabilities capabilities, MonthlyRate monthlyRate, DateTimeOffset searchExpiresBy)
         {
             Id = id;
             PhoneNumbers = phoneNumbers;
@@ -44,14 +71,14 @@ namespace Azure.Communication.Administration.Models
         /// <summary> The phone numbers that are available. Can be fewer than the desired search quantity. </summary>
         public IReadOnlyList<string> PhoneNumbers { get; }
         /// <summary> The phoner number type. </summary>
-        public PhoneNumberType? NumberType { get; }
+        public PhoneNumberType NumberType { get; }
         /// <summary> The phone number&apos;s assignment type. </summary>
-        public AssignmentType? AssignmentType { get; }
+        public AssignmentType AssignmentType { get; }
         /// <summary> The phone number&apos;s capabilities. </summary>
-        public Capabilities Capabilities { get; }
+        public PhoneNumberCapabilities Capabilities { get; }
         /// <summary> The monthly cost for an individual phone number. </summary>
         public MonthlyRate MonthlyRate { get; }
         /// <summary> The date that this search result expires and phone numbers are no longer on hold. A search result expires in less than 15min. </summary>
-        public DateTimeOffset? SearchExpiresBy { get; }
+        public DateTimeOffset SearchExpiresBy { get; }
     }
 }

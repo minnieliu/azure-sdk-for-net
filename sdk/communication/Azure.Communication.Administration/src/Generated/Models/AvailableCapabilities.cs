@@ -11,22 +11,13 @@ using Azure.Core;
 namespace Azure.Communication.Administration.Models
 {
     /// <summary> The capabilities of a phone number that are available. </summary>
-    public partial class AvailableCapabilities
+    internal partial class AvailableCapabilities
     {
         /// <summary> Initializes a new instance of AvailableCapabilities. </summary>
         internal AvailableCapabilities()
         {
             Sms = new ChangeTrackingList<CapabilityValue>();
             Calling = new ChangeTrackingList<CapabilityValue>();
-        }
-
-        /// <summary> Initializes a new instance of AvailableCapabilities. </summary>
-        /// <param name="sms"> Available Sms capabilities. </param>
-        /// <param name="calling"> Available Calling capabilities. </param>
-        internal AvailableCapabilities(IReadOnlyList<CapabilityValue> sms, IReadOnlyList<CapabilityValue> calling)
-        {
-            Sms = sms;
-            Calling = calling;
         }
 
         /// <summary> Available Sms capabilities. </summary>

@@ -21,7 +21,7 @@ namespace Azure.Communication.Administration.Models
             Optional<PhoneNumberType> numberType = default;
             Optional<AssignmentType> assignmentType = default;
             Optional<DateTimeOffset> purchaseDate = default;
-            Optional<Capabilities> capabilities = default;
+            Optional<PhoneNumberCapabilities> capabilities = default;
             Optional<string> callbackUrl = default;
             Optional<string> applicationId = default;
             Optional<MonthlyRate> monthlyRate = default;
@@ -79,7 +79,7 @@ namespace Azure.Communication.Administration.Models
                         property.ThrowNonNullablePropertyIsNull();
                         continue;
                     }
-                    capabilities = Capabilities.DeserializeCapabilities(property.Value);
+                    capabilities = PhoneNumberCapabilities.DeserializePhoneNumberCapabilities(property.Value);
                     continue;
                 }
                 if (property.NameEquals("callbackUrl"))
@@ -103,7 +103,7 @@ namespace Azure.Communication.Administration.Models
                     continue;
                 }
             }
-            return new AcquiredPhoneNumber(id.Value, phoneNumber.Value, countryCode.Value, Optional.ToNullable(numberType), Optional.ToNullable(assignmentType), Optional.ToNullable(purchaseDate), capabilities.Value, callbackUrl.Value, applicationId.Value, monthlyRate.Value);
+            return new AcquiredPhoneNumber(id.Value, phoneNumber.Value, countryCode.Value, Optional.ToNullable(numberType), Optional.ToNullable(assignmentType), Optional.ToNullable(purchaseDate), Optional.ToNullable(capabilities), callbackUrl.Value, applicationId.Value, monthlyRate.Value);
         }
     }
 }

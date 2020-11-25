@@ -18,7 +18,7 @@ namespace Azure.Communication.Administration.Models
         /// <summary> Initializes a new instance of MonthlyRate. </summary>
         /// <param name="value"> The monthly rate of a phone plan group. </param>
         /// <param name="currency"> The currency of a phone plan group. </param>
-        internal MonthlyRate(double? value, Currency? currency)
+        internal MonthlyRate(double? value, PhoneNumberCurrency? currency)
         {
             Value = value;
             Currency = currency;
@@ -27,6 +27,6 @@ namespace Azure.Communication.Administration.Models
         /// <summary> The monthly rate of a phone plan group. </summary>
         public double? Value { get; }
         /// <summary> The currency of a phone plan group. </summary>
-        public Currency? Currency { get; }
+        public PhoneNumberCurrency? Currency { get; }
     }
 }

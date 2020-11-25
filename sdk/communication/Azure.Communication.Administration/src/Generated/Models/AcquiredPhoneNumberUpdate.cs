@@ -8,7 +8,7 @@
 namespace Azure.Communication.Administration.Models
 {
     /// <summary> The properties of a phone number that can be changed. </summary>
-    internal partial class AcquiredPhoneNumberUpdate
+    public partial class AcquiredPhoneNumberUpdate
     {
         /// <summary> Initializes a new instance of AcquiredPhoneNumberUpdate. </summary>
         public AcquiredPhoneNumberUpdate()
@@ -20,6 +20,6 @@ namespace Azure.Communication.Administration.Models
         /// <summary> The application id the number has been assigned to. </summary>
         public string ApplicationId { get; set; }
         /// <summary> The new set of enabled capabilities. </summary>
-        public Capabilities Capabilities { get; set; }
+        public PhoneNumberCapabilities? Capabilities { get; set; }
     }
 }

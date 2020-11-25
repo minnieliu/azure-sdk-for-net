@@ -15,29 +15,29 @@ namespace Azure.Communication.Administration.Models
     public partial class AcquiredPhoneNumbers
     {
         /// <summary> Initializes a new instance of AcquiredPhoneNumbers. </summary>
-        /// <param name="phoneNumbers"> Represents a list of acquired phone numbers. </param>
-        /// <exception cref="ArgumentNullException"> <paramref name="phoneNumbers"/> is null. </exception>
-        internal AcquiredPhoneNumbers(IEnumerable<AcquiredPhoneNumber> phoneNumbers)
+        /// <param name="value"> Represents a list of acquired phone numbers. </param>
+        /// <exception cref="ArgumentNullException"> <paramref name="value"/> is null. </exception>
+        internal AcquiredPhoneNumbers(IEnumerable<AcquiredPhoneNumber> value)
         {
-            if (phoneNumbers == null)
+            if (value == null)
             {
-                throw new ArgumentNullException(nameof(phoneNumbers));
+                throw new ArgumentNullException(nameof(value));
             }
 
-            PhoneNumbers = phoneNumbers.ToList();
+            Value = value.ToList();
         }
 
         /// <summary> Initializes a new instance of AcquiredPhoneNumbers. </summary>
-        /// <param name="phoneNumbers"> Represents a list of acquired phone numbers. </param>
+        /// <param name="value"> Represents a list of acquired phone numbers. </param>
         /// <param name="nextLink"> Represents the URL link to the next page. </param>
-        internal AcquiredPhoneNumbers(IReadOnlyList<AcquiredPhoneNumber> phoneNumbers, string nextLink)
+        internal AcquiredPhoneNumbers(IReadOnlyList<AcquiredPhoneNumber> value, string nextLink)
         {
-            PhoneNumbers = phoneNumbers;
+            Value = value;
             NextLink = nextLink;
         }
 
         /// <summary> Represents a list of acquired phone numbers. </summary>
-        public IReadOnlyList<AcquiredPhoneNumber> PhoneNumbers { get; }
+        public IReadOnlyList<AcquiredPhoneNumber> Value { get; }
         /// <summary> Represents the URL link to the next page. </summary>
         public string NextLink { get; }
     }

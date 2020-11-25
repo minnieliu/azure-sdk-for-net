@@ -10,7 +10,7 @@ using System.ComponentModel;
 
 namespace Azure.Communication.Administration.Models
 {
-    /// <summary> The AssignmentType. </summary>
+    /// <summary> The type that the phone number can be assigned to. </summary>
     public readonly partial struct AssignmentType : IEquatable<AssignmentType>
     {
         private readonly string _value;

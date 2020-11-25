@@ -10,7 +10,7 @@ using Azure.Core;
 
 namespace Azure.Communication.Administration.Models
 {
-    internal partial class SearchRequest : IUtf8JsonSerializable
+    public partial struct SearchRequest : IUtf8JsonSerializable
     {
         void IUtf8JsonSerializable.Write(Utf8JsonWriter writer)
         {

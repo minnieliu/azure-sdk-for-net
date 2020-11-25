@@ -11,9 +11,9 @@ using Azure.Core;
 
 namespace Azure.Communication.Administration.Models
 {
-    public partial class Operation
+    public partial struct PhoneNumberOperation
     {
-        internal static Operation DeserializeOperation(JsonElement element)
+        internal static PhoneNumberOperation DeserializePhoneNumberOperation(JsonElement element)
         {
             OperationStatusCodes status = default;
             string id = default;
@@ -65,7 +65,7 @@ namespace Azure.Communication.Administration.Models
                     continue;
                 }
             }
-            return new Operation(status, id, kind, createdDateTime, lastActionDateTime, resourceLocation.Value, error.Value);
+            return new PhoneNumberOperation(status, id, kind, createdDateTime, lastActionDateTime, resourceLocation.Value, error.Value);
         }
     }
 }

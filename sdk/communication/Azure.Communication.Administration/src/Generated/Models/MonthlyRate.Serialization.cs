@@ -15,7 +15,7 @@ namespace Azure.Communication.Administration.Models
         internal static MonthlyRate DeserializeMonthlyRate(JsonElement element)
         {
             Optional<double> value = default;
-            Optional<Currency> currency = default;
+            Optional<PhoneNumberCurrency> currency = default;
             foreach (var property in element.EnumerateObject())
             {
                 if (property.NameEquals("value"))
@@ -35,7 +35,7 @@ namespace Azure.Communication.Administration.Models
                         property.ThrowNonNullablePropertyIsNull();
                         continue;
                     }
-                    currency = new Currency(property.Value.GetString());
+                    currency = new PhoneNumberCurrency(property.Value.GetString());
                     continue;
                 }
             }

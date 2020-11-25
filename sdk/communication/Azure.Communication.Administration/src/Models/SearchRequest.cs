@@ -5,8 +5,8 @@ using Azure.Core;
 
 namespace Azure.Communication.Administration.Models
 {
-    [CodeGenModel("SearchStatus")]
-    public partial struct ReservationStatus
+    [CodeGenModel("SearchRequest")]
+    public readonly partial struct SearchRequest
     {
     }
 }

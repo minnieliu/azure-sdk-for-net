@@ -10,7 +10,7 @@ using Azure.Core;
 
 namespace Azure.Communication.Administration.Models
 {
-    public partial class Capabilities : IUtf8JsonSerializable
+    public partial struct PhoneNumberCapabilities : IUtf8JsonSerializable
     {
         void IUtf8JsonSerializable.Write(Utf8JsonWriter writer)
         {
@@ -28,7 +28,7 @@ namespace Azure.Communication.Administration.Models
             writer.WriteEndObject();
         }
 
-        internal static Capabilities DeserializeCapabilities(JsonElement element)
+        internal static PhoneNumberCapabilities DeserializePhoneNumberCapabilities(JsonElement element)
         {
             Optional<CapabilityValue> sms = default;
             Optional<CapabilityValue> calling = default;
@@ -55,7 +55,7 @@ namespace Azure.Communication.Administration.Models
                     continue;
                 }
             }
-            return new Capabilities(Optional.ToNullable(sms), Optional.ToNullable(calling));
+            return new PhoneNumberCapabilities(Optional.ToNullable(sms), Optional.ToNullable(calling));
         }
     }
 }

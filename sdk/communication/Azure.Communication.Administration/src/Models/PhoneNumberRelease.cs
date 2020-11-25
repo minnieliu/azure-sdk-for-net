@@ -5,8 +5,10 @@ using Azure.Core;
 
 namespace Azure.Communication.Administration.Models
 {
-    [CodeGenModel("CreateSearchOptions")]
-    public partial class CreateReservationOptions
+    /// <summary>
+    /// The phone number release.
+    /// </summary>
+    public partial class PhoneNumberRelease
     {
     }
 }

@@ -10,23 +10,27 @@ using System;
 namespace Azure.Communication.Administration.Models
 {
     /// <summary> The desired properties of a phone number for search. </summary>
-    internal partial class SearchRequest
+    public readonly partial struct SearchRequest
     {
         /// <summary> Initializes a new instance of SearchRequest. </summary>
         /// <param name="numberType"> The phone number type. </param>
         /// <param name="assignmentType"> The phone number&apos;s assignment type. </param>
         /// <param name="capabilities"> The phone number&apos;s capabilities. </param>
-        /// <exception cref="ArgumentNullException"> <paramref name="capabilities"/> is null. </exception>
-        public SearchRequest(PhoneNumberType numberType, AssignmentType assignmentType, Capabilities capabilities)
+        /// <param name="areaCode"> The desired area code. </param>
+        /// <param name="quantity"> The desired quantity of phone numbers. </param>
+        /// <exception cref="ArgumentNullException"> <paramref name="areaCode"/> is null. </exception>
+        public SearchRequest(PhoneNumberType numberType, AssignmentType assignmentType, PhoneNumberCapabilities capabilities, string areaCode, int? quantity)
         {
-            if (capabilities == null)
+            if (areaCode == null)
             {
-                throw new ArgumentNullException(nameof(capabilities));
+                throw new ArgumentNullException(nameof(areaCode));
             }
 
             NumberType = numberType;
             AssignmentType = assignmentType;
             Capabilities = capabilities;
+            AreaCode = areaCode;
+            Quantity = quantity;
         }
 
         /// <summary> The phone number type. </summary>
@@ -34,10 +38,10 @@ namespace Azure.Communication.Administration.Models
         /// <summary> The phone number&apos;s assignment type. </summary>
         public AssignmentType AssignmentType { get; }
         /// <summary> The phone number&apos;s capabilities. </summary>
-        public Capabilities Capabilities { get; }
+        public PhoneNumberCapabilities Capabilities { get; }
         /// <summary> The desired area code. </summary>
-        public string AreaCode { get; set; }
+        public string AreaCode { get; }
         /// <summary> The desired quantity of phone numbers. </summary>
-        public int? Quantity { get; set; }
+        public int? Quantity { get; }
     }
 }

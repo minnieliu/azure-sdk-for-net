@@ -8,25 +8,20 @@
 namespace Azure.Communication.Administration.Models
 {
     /// <summary> The capabilities of a phone number. </summary>
-    public partial class Capabilities
+    public readonly partial struct PhoneNumberCapabilities
     {
-        /// <summary> Initializes a new instance of Capabilities. </summary>
-        public Capabilities()
-        {
-        }
-
-        /// <summary> Initializes a new instance of Capabilities. </summary>
+        /// <summary> Initializes a new instance of PhoneNumberCapabilities. </summary>
         /// <param name="sms"> Available Sms capabilities. </param>
         /// <param name="calling"> Available Calling capabilities. </param>
-        internal Capabilities(CapabilityValue? sms, CapabilityValue? calling)
+        public PhoneNumberCapabilities(CapabilityValue? sms, CapabilityValue? calling)
         {
             Sms = sms;
             Calling = calling;
         }
 
         /// <summary> Available Sms capabilities. </summary>
-        public CapabilityValue? Sms { get; set; }
+        public CapabilityValue? Sms { get; }
         /// <summary> Available Calling capabilities. </summary>
-        public CapabilityValue? Calling { get; set; }
+        public CapabilityValue? Calling { get; }
     }
 }

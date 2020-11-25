@@ -16,13 +16,13 @@ namespace Azure.Communication.Administration.Models
     {
         internal static SearchResult DeserializeSearchResult(JsonElement element)
         {
-            Optional<string> id = default;
-            Optional<IReadOnlyList<string>> phoneNumbers = default;
-            Optional<PhoneNumberType> numberType = default;
-            Optional<AssignmentType> assignmentType = default;
-            Optional<Capabilities> capabilities = default;
-            Optional<MonthlyRate> monthlyRate = default;
-            Optional<DateTimeOffset> searchExpiresBy = default;
+            string id = default;
+            IReadOnlyList<string> phoneNumbers = default;
+            PhoneNumberType numberType = default;
+            AssignmentType assignmentType = default;
+            PhoneNumberCapabilities capabilities = default;
+            MonthlyRate monthlyRate = default;
+            DateTimeOffset searchExpiresBy = default;
             foreach (var property in element.EnumerateObject())
             {
                 if (property.NameEquals("id"))
@@ -32,11 +32,6 @@ namespace Azure.Communication.Administration.Models
                 }
                 if (property.NameEquals("phoneNumbers"))
                 {
-                    if (property.Value.ValueKind == JsonValueKind.Null)
-                    {
-                        property.ThrowNonNullablePropertyIsNull();
-                        continue;
-                    }
                     List<string> array = new List<string>();
                     foreach (var item in property.Value.EnumerateArray())
                     {
@@ -47,56 +42,31 @@ namespace Azure.Communication.Administration.Models
                 }
                 if (property.NameEquals("numberType"))
                 {
-                    if (property.Value.ValueKind == JsonValueKind.Null)
-                    {
-                        property.ThrowNonNullablePropertyIsNull();
-                        continue;
-                    }
                     numberType = new PhoneNumberType(property.Value.GetString());
                     continue;
                 }
                 if (property.NameEquals("assignmentType"))
                 {
-                    if (property.Value.ValueKind == JsonValueKind.Null)
-                    {
-                        property.ThrowNonNullablePropertyIsNull();
-                        continue;
-                    }
                     assignmentType = new AssignmentType(property.Value.GetString());
                     continue;
                 }
                 if (property.NameEquals("capabilities"))
                 {
-                    if (property.Value.ValueKind == JsonValueKind.Null)
-                    {
-                        property.ThrowNonNullablePropertyIsNull();
-                        continue;
-                    }
-                    capabilities = Capabilities.DeserializeCapabilities(property.Value);
+                    capabilities = PhoneNumberCapabilities.DeserializePhoneNumberCapabilities(property.Value);
                     continue;
                 }
                 if (property.NameEquals("monthlyRate"))
                 {
-                    if (property.Value.ValueKind == JsonValueKind.Null)
-                    {
-                        property.ThrowNonNullablePropertyIsNull();
-                        continue;
-                    }
                     monthlyRate = MonthlyRate.DeserializeMonthlyRate(property.Value);
                     continue;
                 }
                 if (property.NameEquals("searchExpiresBy"))
                 {
-                    if (property.Value.ValueKind == JsonValueKind.Null)
-                    {
-                        property.ThrowNonNullablePropertyIsNull();
-                        continue;
-                    }
                     searchExpiresBy = property.Value.GetDateTimeOffset("O");
                     continue;
                 }
             }
-            return new SearchResult(id.Value, Optional.ToList(phoneNumbers), Optional.ToNullable(numberType), Optional.ToNullable(assignmentType), capabilities.Value, monthlyRate.Value, Optional.ToNullable(searchExpiresBy));
+            return new SearchResult(id, phoneNumbers, numberType, assignmentType, capabilities, monthlyRate, searchExpiresBy);
         }
     }
 }

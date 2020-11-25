@@ -5,8 +5,8 @@ using Azure.Core;
 
 namespace Azure.Communication.Administration.Models
 {
-    [CodeGenModel("ReleaseResponse")]
-    internal partial class PhoneNumberReleaseResponse
+    [CodeGenModel("AcquiredPhoneNumberUpdate")]
+    public partial class AcquiredPhoneNumberUpdate
     {
     }
 }

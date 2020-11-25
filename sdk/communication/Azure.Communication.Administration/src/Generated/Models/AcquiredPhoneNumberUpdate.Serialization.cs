@@ -10,7 +10,7 @@ using Azure.Core;
 
 namespace Azure.Communication.Administration.Models
 {
-    internal partial class AcquiredPhoneNumberUpdate : IUtf8JsonSerializable
+    public partial class AcquiredPhoneNumberUpdate : IUtf8JsonSerializable
     {
         void IUtf8JsonSerializable.Write(Utf8JsonWriter writer)
         {
@@ -28,7 +28,7 @@ namespace Azure.Communication.Administration.Models
             if (Optional.IsDefined(Capabilities))
             {
                 writer.WritePropertyName("capabilities");
-                writer.WriteObjectValue(Capabilities);
+                writer.WriteObjectValue(Capabilities.Value);
             }
             writer.WriteEndObject();
         }

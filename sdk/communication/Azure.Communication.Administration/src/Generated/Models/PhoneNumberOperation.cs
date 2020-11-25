@@ -10,30 +10,9 @@ using System;
 namespace Azure.Communication.Administration.Models
 {
     /// <summary> Long running operation. </summary>
-    public partial class Operation
+    public readonly partial struct PhoneNumberOperation
     {
-        /// <summary> Initializes a new instance of Operation. </summary>
-        /// <param name="status"> Status of operation. </param>
-        /// <param name="id"> Id of the operation. </param>
-        /// <param name="kind"> Kind of the operation. </param>
-        /// <param name="createdDateTime"> The date that the operation was created. </param>
-        /// <param name="lastActionDateTime"> The most recent date that the operation was changed. </param>
-        /// <exception cref="ArgumentNullException"> <paramref name="id"/> is null. </exception>
-        internal Operation(OperationStatusCodes status, string id, OperationKind kind, DateTimeOffset createdDateTime, DateTimeOffset lastActionDateTime)
-        {
-            if (id == null)
-            {
-                throw new ArgumentNullException(nameof(id));
-            }
-
-            Status = status;
-            Id = id;
-            Kind = kind;
-            CreatedDateTime = createdDateTime;
-            LastActionDateTime = lastActionDateTime;
-        }
-
-        /// <summary> Initializes a new instance of Operation. </summary>
+        /// <summary> Initializes a new instance of PhoneNumberOperation. </summary>
         /// <param name="status"> Status of operation. </param>
         /// <param name="id"> Id of the operation. </param>
         /// <param name="kind"> Kind of the operation. </param>
@@ -41,8 +20,22 @@ namespace Azure.Communication.Administration.Models
         /// <param name="lastActionDateTime"> The most recent date that the operation was changed. </param>
         /// <param name="resourceLocation"> Url for retrieving the result of the operation if any. </param>
         /// <param name="error"> Represents a service error response body. </param>
-        internal Operation(OperationStatusCodes status, string id, OperationKind kind, DateTimeOffset createdDateTime, DateTimeOffset lastActionDateTime, string resourceLocation, ErrorBody error)
+        /// <exception cref="ArgumentNullException"> <paramref name="id"/>, <paramref name="resourceLocation"/>, or <paramref name="error"/> is null. </exception>
+        internal PhoneNumberOperation(OperationStatusCodes status, string id, OperationKind kind, DateTimeOffset createdDateTime, DateTimeOffset lastActionDateTime, string resourceLocation, ErrorBody error)
         {
+            if (id == null)
+            {
+                throw new ArgumentNullException(nameof(id));
+            }
+            if (resourceLocation == null)
+            {
+                throw new ArgumentNullException(nameof(resourceLocation));
+            }
+            if (error == null)
+            {
+                throw new ArgumentNullException(nameof(error));
+            }
+
             Status = status;
             Id = id;
             Kind = kind;

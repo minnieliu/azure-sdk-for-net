@@ -23,12 +23,12 @@ namespace Azure.Communication.Administration.Models
         /// <param name="countryCode"> The ISO 3166-2 country code of the country that the phone number belongs to. </param>
         /// <param name="numberType"> The type of the phone number. </param>
         /// <param name="assignmentType"> The assignment type of the phone number, people or application. </param>
-        /// <param name="purchaseDate"> . </param>
+        /// <param name="purchaseDate"> The purchase date of the phone number. </param>
         /// <param name="capabilities"> The phone number&apos;s capabilities. </param>
         /// <param name="callbackUrl"> The webhook URL for receiving incoming events. </param>
         /// <param name="applicationId"> The application id the number has been assigned to. </param>
         /// <param name="monthlyRate"> The monthly cost of the phone number. </param>
-        internal AcquiredPhoneNumber(string id, string phoneNumber, string countryCode, PhoneNumberType? numberType, AssignmentType? assignmentType, DateTimeOffset? purchaseDate, Capabilities capabilities, string callbackUrl, string applicationId, MonthlyRate monthlyRate)
+        internal AcquiredPhoneNumber(string id, string phoneNumber, string countryCode, PhoneNumberType? numberType, AssignmentType? assignmentType, DateTimeOffset? purchaseDate, PhoneNumberCapabilities? capabilities, string callbackUrl, string applicationId, MonthlyRate monthlyRate)
         {
             Id = id;
             PhoneNumber = phoneNumber;
@@ -52,9 +52,10 @@ namespace Azure.Communication.Administration.Models
         public PhoneNumberType? NumberType { get; }
         /// <summary> The assignment type of the phone number, people or application. </summary>
         public AssignmentType? AssignmentType { get; }
+        /// <summary> The purchase date of the phone number. </summary>
         public DateTimeOffset? PurchaseDate { get; }
         /// <summary> The phone number&apos;s capabilities. </summary>
-        public Capabilities Capabilities { get; }
+        public PhoneNumberCapabilities? Capabilities { get; }
         /// <summary> The webhook URL for receiving incoming events. </summary>
         public string CallbackUrl { get; }
         /// <summary> The application id the number has been assigned to. </summary>
