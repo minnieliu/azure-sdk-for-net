@@ -12,8 +12,7 @@ namespace Azure.Communication.Administration.Tests.samples
         public async Task SearchForPhoneNumbers()
         {
             string connectionString = "CONNECTION_STRING";
-            string countryCode = "US";
-            string areaCode = "425";
+            PhoneNumberClient phoneNumberClient = new PhoneNumberClient(connectionString);
 
             CapabilitiesRequest capabilitiesRequest = new CapabilitiesRequest();
             capabilitiesRequest.Sms = CapabilityValue.Outbound;
@@ -23,12 +22,10 @@ namespace Azure.Communication.Administration.Tests.samples
                 PhoneNumberType.Geographic,
                 AssignmentType.Application,
                 capabilitiesRequest,
-                areaCode,
+                "425",
                 2);
 
-            PhoneNumberClient phoneNumberClient = new PhoneNumberClient(connectionString);
-
-            var searchPhoneNumberOperation = await phoneNumberClient.StartSearchPhoneNumberAsync(countryCode, searchRequest);
+            var searchPhoneNumberOperation = await phoneNumberClient.StartSearchPhoneNumberAsync("US", searchRequest);
             await searchPhoneNumberOperation.WaitForCompletionAsync().ConfigureAwait(false);
             SearchResult searchResult = searchPhoneNumberOperation.Value;
 
@@ -99,6 +96,7 @@ namespace Azure.Communication.Administration.Tests.samples
         {
             string connectionString = "CONNECTION_STRING";
             PhoneNumberClient phoneNumberClient = new PhoneNumberClient(connectionString);
+
             AcquiredPhoneNumber[] acquiredPhoneNumbers = phoneNumberClient.ListAcquiredPhoneNumbers().ToArray();
 
             foreach (AcquiredPhoneNumber acquiredPhoneNumber in acquiredPhoneNumbers)
