@@ -18,9 +18,13 @@ namespace Azure.Communication.Administration.Models
         /// <param name="capabilities"> The phone number&apos;s capabilities. </param>
         /// <param name="areaCode"> The desired area code. </param>
         /// <param name="quantity"> The desired quantity of phone numbers. </param>
-        /// <exception cref="ArgumentNullException"> <paramref name="areaCode"/> is null. </exception>
-        public SearchRequest(PhoneNumberType numberType, AssignmentType assignmentType, PhoneNumberCapabilities capabilities, string areaCode, int? quantity)
+        /// <exception cref="ArgumentNullException"> <paramref name="capabilities"/> or <paramref name="areaCode"/> is null. </exception>
+        public SearchRequest(PhoneNumberType numberType, AssignmentType assignmentType, CapabilitiesRequest capabilities, string areaCode, int? quantity)
         {
+            if (capabilities == null)
+            {
+                throw new ArgumentNullException(nameof(capabilities));
+            }
             if (areaCode == null)
             {
                 throw new ArgumentNullException(nameof(areaCode));
@@ -38,7 +42,7 @@ namespace Azure.Communication.Administration.Models
         /// <summary> The phone number&apos;s assignment type. </summary>
         public AssignmentType AssignmentType { get; }
         /// <summary> The phone number&apos;s capabilities. </summary>
-        public PhoneNumberCapabilities Capabilities { get; }
+        public CapabilitiesRequest Capabilities { get; }
         /// <summary> The desired area code. </summary>
         public string AreaCode { get; }
         /// <summary> The desired quantity of phone numbers. </summary>

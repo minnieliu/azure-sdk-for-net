@@ -39,7 +39,7 @@ namespace Azure.Communication.Administration
             _pipeline = pipeline;
         }
 
-        internal HttpMessage CreateSearchAvailablePhoneNumbersRequest(string countryCode, PhoneNumberType numberType, AssignmentType assignmentType, PhoneNumberCapabilities capabilities, string areaCode, int? quantity)
+        internal HttpMessage CreateSearchAvailablePhoneNumbersRequest(string countryCode, PhoneNumberType numberType, AssignmentType assignmentType, CapabilitiesRequest capabilities, string areaCode, int? quantity)
         {
             var message = _pipeline.CreateMessage();
             var request = message.Request;
@@ -68,12 +68,16 @@ namespace Azure.Communication.Administration
         /// <param name="areaCode"> The desired area code. </param>
         /// <param name="quantity"> The desired quantity of phone numbers. </param>
         /// <param name="cancellationToken"> The cancellation token to use. </param>
-        /// <exception cref="ArgumentNullException"> <paramref name="countryCode"/> is null. </exception>
-        public async Task<ResponseWithHeaders<PhoneNumberAdministrationSearchAvailablePhoneNumbersHeaders>> SearchAvailablePhoneNumbersAsync(string countryCode, PhoneNumberType numberType, AssignmentType assignmentType, PhoneNumberCapabilities capabilities, string areaCode = null, int? quantity = null, CancellationToken cancellationToken = default)
+        /// <exception cref="ArgumentNullException"> <paramref name="countryCode"/> or <paramref name="capabilities"/> is null. </exception>
+        public async Task<ResponseWithHeaders<PhoneNumberAdministrationSearchAvailablePhoneNumbersHeaders>> SearchAvailablePhoneNumbersAsync(string countryCode, PhoneNumberType numberType, AssignmentType assignmentType, CapabilitiesRequest capabilities, string areaCode = null, int? quantity = null, CancellationToken cancellationToken = default)
         {
             if (countryCode == null)
             {
                 throw new ArgumentNullException(nameof(countryCode));
+            }
+            if (capabilities == null)
+            {
+                throw new ArgumentNullException(nameof(capabilities));
             }
 
             using var message = CreateSearchAvailablePhoneNumbersRequest(countryCode, numberType, assignmentType, capabilities, areaCode, quantity);
@@ -96,12 +100,16 @@ namespace Azure.Communication.Administration
         /// <param name="areaCode"> The desired area code. </param>
         /// <param name="quantity"> The desired quantity of phone numbers. </param>
         /// <param name="cancellationToken"> The cancellation token to use. </param>
-        /// <exception cref="ArgumentNullException"> <paramref name="countryCode"/> is null. </exception>
-        public ResponseWithHeaders<PhoneNumberAdministrationSearchAvailablePhoneNumbersHeaders> SearchAvailablePhoneNumbers(string countryCode, PhoneNumberType numberType, AssignmentType assignmentType, PhoneNumberCapabilities capabilities, string areaCode = null, int? quantity = null, CancellationToken cancellationToken = default)
+        /// <exception cref="ArgumentNullException"> <paramref name="countryCode"/> or <paramref name="capabilities"/> is null. </exception>
+        public ResponseWithHeaders<PhoneNumberAdministrationSearchAvailablePhoneNumbersHeaders> SearchAvailablePhoneNumbers(string countryCode, PhoneNumberType numberType, AssignmentType assignmentType, CapabilitiesRequest capabilities, string areaCode = null, int? quantity = null, CancellationToken cancellationToken = default)
         {
             if (countryCode == null)
             {
                 throw new ArgumentNullException(nameof(countryCode));
+            }
+            if (capabilities == null)
+            {
+                throw new ArgumentNullException(nameof(capabilities));
             }
 
             using var message = CreateSearchAvailablePhoneNumbersRequest(countryCode, numberType, assignmentType, capabilities, areaCode, quantity);
@@ -439,7 +447,7 @@ namespace Azure.Communication.Administration
         }
 
         /// <summary> Gets information about an acquired phone number. </summary>
-        /// <param name="phoneNumber"> The phone number id, this is the phone number in E.164 format without the leading +. </param>
+        /// <param name="phoneNumber"> The phone number id in E.164 format. The leading plus can be either + or encoded as %2B. </param>
         /// <param name="cancellationToken"> The cancellation token to use. </param>
         /// <exception cref="ArgumentNullException"> <paramref name="phoneNumber"/> is null. </exception>
         public async Task<Response<AcquiredPhoneNumber>> GetPhoneNumberAsync(string phoneNumber, CancellationToken cancellationToken = default)
@@ -466,7 +474,7 @@ namespace Azure.Communication.Administration
         }
 
         /// <summary> Gets information about an acquired phone number. </summary>
-        /// <param name="phoneNumber"> The phone number id, this is the phone number in E.164 format without the leading +. </param>
+        /// <param name="phoneNumber"> The phone number id in E.164 format. The leading plus can be either + or encoded as %2B. </param>
         /// <param name="cancellationToken"> The cancellation token to use. </param>
         /// <exception cref="ArgumentNullException"> <paramref name="phoneNumber"/> is null. </exception>
         public Response<AcquiredPhoneNumber> GetPhoneNumber(string phoneNumber, CancellationToken cancellationToken = default)
@@ -492,7 +500,7 @@ namespace Azure.Communication.Administration
             }
         }
 
-        internal HttpMessage CreateUpdatePhoneNumberRequest(string phoneNumber, string callbackUrl, string applicationId, PhoneNumberCapabilities? capabilities)
+        internal HttpMessage CreateUpdatePhoneNumberRequest(string phoneNumber, string callbackUrl, string applicationId, CapabilitiesRequest capabilities)
         {
             var message = _pipeline.CreateMessage();
             var request = message.Request;
@@ -518,13 +526,13 @@ namespace Azure.Communication.Administration
         }
 
         /// <summary> Update an acquired phone number. </summary>
-        /// <param name="phoneNumber"> The phone number id, this is the phone number in E.164 format without the leading +. </param>
+        /// <param name="phoneNumber"> The phone number id in E.164 format. The leading plus can be either + or encoded as %2B. </param>
         /// <param name="callbackUrl"> The webhook URL for receiving incoming events. </param>
         /// <param name="applicationId"> The application id the number has been assigned to. </param>
         /// <param name="capabilities"> The new set of enabled capabilities. </param>
         /// <param name="cancellationToken"> The cancellation token to use. </param>
         /// <exception cref="ArgumentNullException"> <paramref name="phoneNumber"/> is null. </exception>
-        public async Task<ResponseWithHeaders<PhoneNumberAdministrationUpdatePhoneNumberHeaders>> UpdatePhoneNumberAsync(string phoneNumber, string callbackUrl = null, string applicationId = null, PhoneNumberCapabilities? capabilities = null, CancellationToken cancellationToken = default)
+        public async Task<ResponseWithHeaders<PhoneNumberAdministrationUpdatePhoneNumberHeaders>> UpdatePhoneNumberAsync(string phoneNumber, string callbackUrl = null, string applicationId = null, CapabilitiesRequest capabilities = null, CancellationToken cancellationToken = default)
         {
             if (phoneNumber == null)
             {
@@ -544,13 +552,13 @@ namespace Azure.Communication.Administration
         }
 
         /// <summary> Update an acquired phone number. </summary>
-        /// <param name="phoneNumber"> The phone number id, this is the phone number in E.164 format without the leading +. </param>
+        /// <param name="phoneNumber"> The phone number id in E.164 format. The leading plus can be either + or encoded as %2B. </param>
         /// <param name="callbackUrl"> The webhook URL for receiving incoming events. </param>
         /// <param name="applicationId"> The application id the number has been assigned to. </param>
         /// <param name="capabilities"> The new set of enabled capabilities. </param>
         /// <param name="cancellationToken"> The cancellation token to use. </param>
         /// <exception cref="ArgumentNullException"> <paramref name="phoneNumber"/> is null. </exception>
-        public ResponseWithHeaders<PhoneNumberAdministrationUpdatePhoneNumberHeaders> UpdatePhoneNumber(string phoneNumber, string callbackUrl = null, string applicationId = null, PhoneNumberCapabilities? capabilities = null, CancellationToken cancellationToken = default)
+        public ResponseWithHeaders<PhoneNumberAdministrationUpdatePhoneNumberHeaders> UpdatePhoneNumber(string phoneNumber, string callbackUrl = null, string applicationId = null, CapabilitiesRequest capabilities = null, CancellationToken cancellationToken = default)
         {
             if (phoneNumber == null)
             {
@@ -585,7 +593,7 @@ namespace Azure.Communication.Administration
         }
 
         /// <summary> Releases an acquired phone number. </summary>
-        /// <param name="phoneNumber"> The phone number id, this is the phone number in E.164 format without the leading +. </param>
+        /// <param name="phoneNumber"> The phone number id in E.164 format. The leading plus can be either + or encoded as %2B. </param>
         /// <param name="cancellationToken"> The cancellation token to use. </param>
         /// <exception cref="ArgumentNullException"> <paramref name="phoneNumber"/> is null. </exception>
         public async Task<ResponseWithHeaders<PhoneNumberAdministrationReleasePhoneNumberHeaders>> ReleasePhoneNumberAsync(string phoneNumber, CancellationToken cancellationToken = default)
@@ -608,7 +616,7 @@ namespace Azure.Communication.Administration
         }
 
         /// <summary> Releases an acquired phone number. </summary>
-        /// <param name="phoneNumber"> The phone number id, this is the phone number in E.164 format without the leading +. </param>
+        /// <param name="phoneNumber"> The phone number id in E.164 format. The leading plus can be either + or encoded as %2B. </param>
         /// <param name="cancellationToken"> The cancellation token to use. </param>
         /// <exception cref="ArgumentNullException"> <paramref name="phoneNumber"/> is null. </exception>
         public ResponseWithHeaders<PhoneNumberAdministrationReleasePhoneNumberHeaders> ReleasePhoneNumber(string phoneNumber, CancellationToken cancellationToken = default)
@@ -625,6 +633,73 @@ namespace Azure.Communication.Administration
             {
                 case 202:
                     return ResponseWithHeaders.FromValue(headers, message.Response);
+                default:
+                    throw _clientDiagnostics.CreateRequestFailedException(message.Response);
+            }
+        }
+
+        internal HttpMessage CreateListPhoneNumbersNextPageRequest(string nextLink)
+        {
+            var message = _pipeline.CreateMessage();
+            var request = message.Request;
+            request.Method = RequestMethod.Get;
+            var uri = new RawRequestUriBuilder();
+            uri.AppendRaw(endpoint, false);
+            uri.AppendRawNextLink(nextLink, false);
+            request.Uri = uri;
+            request.Headers.Add("Accept", "application/json");
+            return message;
+        }
+
+        /// <summary> Lists acquired phone numbers. </summary>
+        /// <param name="nextLink"> The URL to the next page of results. </param>
+        /// <param name="cancellationToken"> The cancellation token to use. </param>
+        /// <exception cref="ArgumentNullException"> <paramref name="nextLink"/> is null. </exception>
+        public async Task<Response<AcquiredPhoneNumbers>> ListPhoneNumbersNextPageAsync(string nextLink, CancellationToken cancellationToken = default)
+        {
+            if (nextLink == null)
+            {
+                throw new ArgumentNullException(nameof(nextLink));
+            }
+
+            using var message = CreateListPhoneNumbersNextPageRequest(nextLink);
+            await _pipeline.SendAsync(message, cancellationToken).ConfigureAwait(false);
+            switch (message.Response.Status)
+            {
+                case 200:
+                    {
+                        AcquiredPhoneNumbers value = default;
+                        using var document = await JsonDocument.ParseAsync(message.Response.ContentStream, default, cancellationToken).ConfigureAwait(false);
+                        value = AcquiredPhoneNumbers.DeserializeAcquiredPhoneNumbers(document.RootElement);
+                        return Response.FromValue(value, message.Response);
+                    }
+                default:
+                    throw await _clientDiagnostics.CreateRequestFailedExceptionAsync(message.Response).ConfigureAwait(false);
+            }
+        }
+
+        /// <summary> Lists acquired phone numbers. </summary>
+        /// <param name="nextLink"> The URL to the next page of results. </param>
+        /// <param name="cancellationToken"> The cancellation token to use. </param>
+        /// <exception cref="ArgumentNullException"> <paramref name="nextLink"/> is null. </exception>
+        public Response<AcquiredPhoneNumbers> ListPhoneNumbersNextPage(string nextLink, CancellationToken cancellationToken = default)
+        {
+            if (nextLink == null)
+            {
+                throw new ArgumentNullException(nameof(nextLink));
+            }
+
+            using var message = CreateListPhoneNumbersNextPageRequest(nextLink);
+            _pipeline.Send(message, cancellationToken);
+            switch (message.Response.Status)
+            {
+                case 200:
+                    {
+                        AcquiredPhoneNumbers value = default;
+                        using var document = JsonDocument.Parse(message.Response.ContentStream);
+                        value = AcquiredPhoneNumbers.DeserializeAcquiredPhoneNumbers(document.RootElement);
+                        return Response.FromValue(value, message.Response);
+                    }
                 default:
                     throw _clientDiagnostics.CreateRequestFailedException(message.Response);
             }

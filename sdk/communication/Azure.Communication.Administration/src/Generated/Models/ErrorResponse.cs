@@ -11,11 +11,6 @@ namespace Azure.Communication.Administration.Models
     internal partial class ErrorResponse
     {
         /// <summary> Initializes a new instance of ErrorResponse. </summary>
-        internal ErrorResponse()
-        {
-        }
-
-        /// <summary> Initializes a new instance of ErrorResponse. </summary>
         /// <param name="error"> Represents a service error response body. </param>
         internal ErrorResponse(ErrorBody error)
         {

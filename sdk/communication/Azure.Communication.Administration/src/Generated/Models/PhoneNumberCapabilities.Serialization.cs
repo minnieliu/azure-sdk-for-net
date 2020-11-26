@@ -10,52 +10,26 @@ using Azure.Core;
 
 namespace Azure.Communication.Administration.Models
 {
-    public partial struct PhoneNumberCapabilities : IUtf8JsonSerializable
+    public partial struct PhoneNumberCapabilities
     {
-        void IUtf8JsonSerializable.Write(Utf8JsonWriter writer)
-        {
-            writer.WriteStartObject();
-            if (Optional.IsDefined(Sms))
-            {
-                writer.WritePropertyName("sms");
-                writer.WriteStringValue(Sms.Value.ToString());
-            }
-            if (Optional.IsDefined(Calling))
-            {
-                writer.WritePropertyName("calling");
-                writer.WriteStringValue(Calling.Value.ToString());
-            }
-            writer.WriteEndObject();
-        }
-
         internal static PhoneNumberCapabilities DeserializePhoneNumberCapabilities(JsonElement element)
         {
-            Optional<CapabilityValue> sms = default;
-            Optional<CapabilityValue> calling = default;
+            CapabilityValue sms = default;
+            CapabilityValue calling = default;
             foreach (var property in element.EnumerateObject())
             {
                 if (property.NameEquals("sms"))
                 {
-                    if (property.Value.ValueKind == JsonValueKind.Null)
-                    {
-                        property.ThrowNonNullablePropertyIsNull();
-                        continue;
-                    }
                     sms = new CapabilityValue(property.Value.GetString());
                     continue;
                 }
                 if (property.NameEquals("calling"))
                 {
-                    if (property.Value.ValueKind == JsonValueKind.Null)
-                    {
-                        property.ThrowNonNullablePropertyIsNull();
-                        continue;
-                    }
                     calling = new CapabilityValue(property.Value.GetString());
                     continue;
                 }
             }
-            return new PhoneNumberCapabilities(Optional.ToNullable(sms), Optional.ToNullable(calling));
+            return new PhoneNumberCapabilities(sms, calling);
         }
     }
 }

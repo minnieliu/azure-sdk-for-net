@@ -10,12 +10,13 @@ using Azure.Core;
 
 namespace Azure.Communication.Administration.Models
 {
-    public partial class ErrorBody
+    public partial struct ErrorBody
     {
         internal static ErrorBody DeserializeErrorBody(JsonElement element)
         {
-            Optional<string> code = default;
-            Optional<string> message = default;
+            string code = default;
+            string message = default;
+            Optional<ErrorBody> innererror = default;
             foreach (var property in element.EnumerateObject())
             {
                 if (property.NameEquals("code"))
@@ -28,8 +29,18 @@ namespace Azure.Communication.Administration.Models
                     message = property.Value.GetString();
                     continue;
                 }
+                if (property.NameEquals("innererror"))
+                {
+                    if (property.Value.ValueKind == JsonValueKind.Null)
+                    {
+                        property.ThrowNonNullablePropertyIsNull();
+                        continue;
+                    }
+                    innererror = DeserializeErrorBody(property.Value);
+                    continue;
+                }
             }
-            return new ErrorBody(code.Value, message.Value);
+            return new ErrorBody(code, message, Optional.ToNullable(innererror));
         }
     }
 }

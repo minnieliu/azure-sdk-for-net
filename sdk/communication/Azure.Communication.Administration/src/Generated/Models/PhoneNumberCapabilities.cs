@@ -13,15 +13,15 @@ namespace Azure.Communication.Administration.Models
         /// <summary> Initializes a new instance of PhoneNumberCapabilities. </summary>
         /// <param name="sms"> Available Sms capabilities. </param>
         /// <param name="calling"> Available Calling capabilities. </param>
-        public PhoneNumberCapabilities(CapabilityValue? sms, CapabilityValue? calling)
+        internal PhoneNumberCapabilities(CapabilityValue sms, CapabilityValue calling)
         {
             Sms = sms;
             Calling = calling;
         }
 
         /// <summary> Available Sms capabilities. </summary>
-        public CapabilityValue? Sms { get; }
+        public CapabilityValue Sms { get; }
         /// <summary> Available Calling capabilities. </summary>
-        public CapabilityValue? Calling { get; }
+        public CapabilityValue Calling { get; }
     }
 }

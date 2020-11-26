@@ -20,8 +20,8 @@ namespace Azure.Communication.Administration.Models
         /// <param name="lastActionDateTime"> The most recent date that the operation was changed. </param>
         /// <param name="resourceLocation"> Url for retrieving the result of the operation if any. </param>
         /// <param name="error"> Represents a service error response body. </param>
-        /// <exception cref="ArgumentNullException"> <paramref name="id"/>, <paramref name="resourceLocation"/>, or <paramref name="error"/> is null. </exception>
-        internal PhoneNumberOperation(OperationStatusCodes status, string id, OperationKind kind, DateTimeOffset createdDateTime, DateTimeOffset lastActionDateTime, string resourceLocation, ErrorBody error)
+        /// <exception cref="ArgumentNullException"> <paramref name="id"/> or <paramref name="resourceLocation"/> is null. </exception>
+        internal PhoneNumberOperation(OperationStatusCodes status, string id, OperationKind kind, DateTimeOffset createdDateTime, DateTimeOffset lastActionDateTime, string resourceLocation, ErrorBody? error)
         {
             if (id == null)
             {
@@ -30,10 +30,6 @@ namespace Azure.Communication.Administration.Models
             if (resourceLocation == null)
             {
                 throw new ArgumentNullException(nameof(resourceLocation));
-            }
-            if (error == null)
-            {
-                throw new ArgumentNullException(nameof(error));
             }
 
             Status = status;
@@ -58,6 +54,6 @@ namespace Azure.Communication.Administration.Models
         /// <summary> Url for retrieving the result of the operation if any. </summary>
         public string ResourceLocation { get; }
         /// <summary> Represents a service error response body. </summary>
-        public ErrorBody Error { get; }
+        public ErrorBody? Error { get; }
     }
 }

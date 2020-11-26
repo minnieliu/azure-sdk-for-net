@@ -14,32 +14,22 @@ namespace Azure.Communication.Administration.Models
     {
         internal static MonthlyRate DeserializeMonthlyRate(JsonElement element)
         {
-            Optional<double> value = default;
-            Optional<PhoneNumberCurrency> currency = default;
+            double value = default;
+            string currency = default;
             foreach (var property in element.EnumerateObject())
             {
                 if (property.NameEquals("value"))
                 {
-                    if (property.Value.ValueKind == JsonValueKind.Null)
-                    {
-                        property.ThrowNonNullablePropertyIsNull();
-                        continue;
-                    }
                     value = property.Value.GetDouble();
                     continue;
                 }
                 if (property.NameEquals("currency"))
                 {
-                    if (property.Value.ValueKind == JsonValueKind.Null)
-                    {
-                        property.ThrowNonNullablePropertyIsNull();
-                        continue;
-                    }
-                    currency = new PhoneNumberCurrency(property.Value.GetString());
+                    currency = property.Value.GetString();
                     continue;
                 }
             }
-            return new MonthlyRate(Optional.ToNullable(value), Optional.ToNullable(currency));
+            return new MonthlyRate(value, currency);
         }
     }
 }

@@ -5,8 +5,8 @@ using Azure.Core;
 
 namespace Azure.Communication.Administration.Models
 {
-    [CodeGenModel("Currency")]
-    public readonly partial struct PhoneNumberCurrency
+    [CodeGenModel("Error")]
+    public partial struct ErrorBody
     {
     }
 }

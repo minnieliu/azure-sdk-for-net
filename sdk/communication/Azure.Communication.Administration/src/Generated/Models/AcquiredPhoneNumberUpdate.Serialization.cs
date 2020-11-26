@@ -28,7 +28,7 @@ namespace Azure.Communication.Administration.Models
             if (Optional.IsDefined(Capabilities))
             {
                 writer.WritePropertyName("capabilities");
-                writer.WriteObjectValue(Capabilities.Value);
+                writer.WriteObjectValue(Capabilities);
             }
             writer.WriteEndObject();
         }

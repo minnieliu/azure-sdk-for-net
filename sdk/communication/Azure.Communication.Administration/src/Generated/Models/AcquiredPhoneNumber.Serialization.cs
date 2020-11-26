@@ -15,16 +15,16 @@ namespace Azure.Communication.Administration.Models
     {
         internal static AcquiredPhoneNumber DeserializeAcquiredPhoneNumber(JsonElement element)
         {
-            Optional<string> id = default;
-            Optional<string> phoneNumber = default;
-            Optional<string> countryCode = default;
-            Optional<PhoneNumberType> numberType = default;
-            Optional<AssignmentType> assignmentType = default;
-            Optional<DateTimeOffset> purchaseDate = default;
-            Optional<PhoneNumberCapabilities> capabilities = default;
-            Optional<string> callbackUrl = default;
-            Optional<string> applicationId = default;
-            Optional<MonthlyRate> monthlyRate = default;
+            string id = default;
+            string phoneNumber = default;
+            string countryCode = default;
+            PhoneNumberType numberType = default;
+            AssignmentType assignmentType = default;
+            DateTimeOffset purchaseDate = default;
+            PhoneNumberCapabilities capabilities = default;
+            string callbackUrl = default;
+            string applicationId = default;
+            MonthlyRate monthlyRate = default;
             foreach (var property in element.EnumerateObject())
             {
                 if (property.NameEquals("id"))
@@ -44,41 +44,21 @@ namespace Azure.Communication.Administration.Models
                 }
                 if (property.NameEquals("numberType"))
                 {
-                    if (property.Value.ValueKind == JsonValueKind.Null)
-                    {
-                        property.ThrowNonNullablePropertyIsNull();
-                        continue;
-                    }
                     numberType = new PhoneNumberType(property.Value.GetString());
                     continue;
                 }
                 if (property.NameEquals("assignmentType"))
                 {
-                    if (property.Value.ValueKind == JsonValueKind.Null)
-                    {
-                        property.ThrowNonNullablePropertyIsNull();
-                        continue;
-                    }
                     assignmentType = new AssignmentType(property.Value.GetString());
                     continue;
                 }
                 if (property.NameEquals("purchaseDate"))
                 {
-                    if (property.Value.ValueKind == JsonValueKind.Null)
-                    {
-                        property.ThrowNonNullablePropertyIsNull();
-                        continue;
-                    }
                     purchaseDate = property.Value.GetDateTimeOffset("O");
                     continue;
                 }
                 if (property.NameEquals("capabilities"))
                 {
-                    if (property.Value.ValueKind == JsonValueKind.Null)
-                    {
-                        property.ThrowNonNullablePropertyIsNull();
-                        continue;
-                    }
                     capabilities = PhoneNumberCapabilities.DeserializePhoneNumberCapabilities(property.Value);
                     continue;
                 }
@@ -94,16 +74,11 @@ namespace Azure.Communication.Administration.Models
                 }
                 if (property.NameEquals("monthlyRate"))
                 {
-                    if (property.Value.ValueKind == JsonValueKind.Null)
-                    {
-                        property.ThrowNonNullablePropertyIsNull();
-                        continue;
-                    }
                     monthlyRate = MonthlyRate.DeserializeMonthlyRate(property.Value);
                     continue;
                 }
             }
-            return new AcquiredPhoneNumber(id.Value, phoneNumber.Value, countryCode.Value, Optional.ToNullable(numberType), Optional.ToNullable(assignmentType), Optional.ToNullable(purchaseDate), Optional.ToNullable(capabilities), callbackUrl.Value, applicationId.Value, monthlyRate.Value);
+            return new AcquiredPhoneNumber(id, phoneNumber, countryCode, numberType, assignmentType, purchaseDate, capabilities, callbackUrl, applicationId, monthlyRate);
         }
     }
 }

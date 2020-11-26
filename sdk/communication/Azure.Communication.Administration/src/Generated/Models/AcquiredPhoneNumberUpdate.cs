@@ -20,6 +20,6 @@ namespace Azure.Communication.Administration.Models
         /// <summary> The application id the number has been assigned to. </summary>
         public string ApplicationId { get; set; }
         /// <summary> The new set of enabled capabilities. </summary>
-        public PhoneNumberCapabilities? Capabilities { get; set; }
+        public CapabilitiesRequest Capabilities { get; set; }
     }
 }

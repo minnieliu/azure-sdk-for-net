@@ -65,7 +65,7 @@ namespace Azure.Communication.Administration.Models
                     continue;
                 }
             }
-            return new PhoneNumberOperation(status, id, kind, createdDateTime, lastActionDateTime, resourceLocation.Value, error.Value);
+            return new PhoneNumberOperation(status, id, kind, createdDateTime, lastActionDateTime, resourceLocation.Value, Optional.ToNullable(error));
         }
     }
 }

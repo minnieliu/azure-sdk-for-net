@@ -5,28 +5,31 @@
 
 #nullable disable
 
+using System;
+
 namespace Azure.Communication.Administration.Models
 {
-    /// <summary> Represents a wrapper of rate information. </summary>
+    /// <summary> The monthly incurred cost for a single phone number. </summary>
     public partial class MonthlyRate
     {
         /// <summary> Initializes a new instance of MonthlyRate. </summary>
-        internal MonthlyRate()
+        /// <param name="value"> The cost amount. </param>
+        /// <param name="currency"> The currency of the cost amount. </param>
+        /// <exception cref="ArgumentNullException"> <paramref name="currency"/> is null. </exception>
+        internal MonthlyRate(double value, string currency)
         {
-        }
+            if (currency == null)
+            {
+                throw new ArgumentNullException(nameof(currency));
+            }
 
-        /// <summary> Initializes a new instance of MonthlyRate. </summary>
-        /// <param name="value"> The monthly rate of a phone plan group. </param>
-        /// <param name="currency"> The currency of a phone plan group. </param>
-        internal MonthlyRate(double? value, PhoneNumberCurrency? currency)
-        {
             Value = value;
             Currency = currency;
         }
 
-        /// <summary> The monthly rate of a phone plan group. </summary>
-        public double? Value { get; }
-        /// <summary> The currency of a phone plan group. </summary>
-        public PhoneNumberCurrency? Currency { get; }
+        /// <summary> The cost amount. </summary>
+        public double Value { get; }
+        /// <summary> The currency of the cost amount. </summary>
+        public string Currency { get; }
     }
 }
