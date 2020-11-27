@@ -87,7 +87,6 @@ namespace Azure.Communication.Administration.Tests.samples
 
             string phoneNumber = "PHONE_NUMBER";
             var releasePhoneNumberOperation = await phoneNumberClient.StartReleasePhoneNumberAsync(phoneNumber);
-            Operation<PhoneNumberRelease> operation = new Operation<PhoneNumberRelease>(releasePhoneNumberOperation.Id);
             await releasePhoneNumberOperation.WaitForCompletionAsync().ConfigureAwait(false);
 
 
