@@ -25,7 +25,7 @@ namespace Azure.Communication.Administration.Tests.samples
                 "425",
                 2);
 
-            var searchPhoneNumberOperation = await phoneNumberClient.StartSearchPhoneNumberAsync("US", searchRequest);
+            var searchPhoneNumberOperation = await phoneNumberClient.StartSearchPhoneNumbersAsync("US", searchRequest);
             await searchPhoneNumberOperation.WaitForCompletionAsync().ConfigureAwait(false);
             SearchResult searchResult = searchPhoneNumberOperation.Value;
 
@@ -45,7 +45,7 @@ namespace Azure.Communication.Administration.Tests.samples
             PhoneNumberClient phoneNumberClient = new PhoneNumberClient(connectionString);
 
             string searchId = "SEARCH_ID";
-            var purchasePhoneNumberOperation = await phoneNumberClient.StartPurchasePhoneNumberAsync(searchId);
+            var purchasePhoneNumberOperation = await phoneNumberClient.StartPurchasePhoneNumbersAsync(searchId);
             await purchasePhoneNumberOperation.WaitForCompletionAsync().ConfigureAwait(false);
             SearchResult searchResult = purchasePhoneNumberOperation.Value;
 

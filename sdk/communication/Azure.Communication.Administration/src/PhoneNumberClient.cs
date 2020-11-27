@@ -54,7 +54,7 @@ namespace Azure.Communication.Administration
         /// <param name="searchRequest"> Defines the search options. </param>
         /// <param name="cancellationToken"> The cancellation token to use. </param>
         /// <returns> A <see cref="Operation{SearchResult}"/>. </returns>
-        public virtual async Task<Operation<SearchResult>> StartSearchPhoneNumberAsync(string countryCode, SearchRequest searchRequest, CancellationToken cancellationToken = default)
+        public virtual async Task<Operation<SearchResult>> StartSearchPhoneNumbersAsync(string countryCode, SearchRequest searchRequest, CancellationToken cancellationToken = default)
         {
             await Task.Yield();
             throw new NotImplementedException();
@@ -65,7 +65,7 @@ namespace Azure.Communication.Administration
         /// <param name="searchRequest"> Defines the search options. </param>
         /// <param name="cancellationToken"> The cancellation token to use. </param>
         /// <returns> A <see cref="Operation{SearchResult}"/>. </returns>
-        public virtual Operation<SearchResult> StartSearchPhoneNumber(string countryCode, SearchRequest searchRequest, CancellationToken cancellationToken = default)
+        public virtual Operation<SearchResult> StartSearchPhoneNumbers(string countryCode, SearchRequest searchRequest, CancellationToken cancellationToken = default)
         {
             throw new NotImplementedException();
         }
@@ -74,7 +74,7 @@ namespace Azure.Communication.Administration
         /// <param name="searchId"> The search id to be purchased. </param>
         /// <param name="cancellationToken"> The cancellation token to use. </param>
         /// <returns> A <see cref="SearchResult"/>. </returns>
-        public virtual async Task<Operation<SearchResult>> StartPurchasePhoneNumberAsync(string searchId, CancellationToken cancellationToken = default)
+        public virtual async Task<Operation<SearchResult>> StartPurchasePhoneNumbersAsync(string searchId, CancellationToken cancellationToken = default)
         {
             await Task.Yield();
             throw new NotImplementedException();
@@ -84,7 +84,7 @@ namespace Azure.Communication.Administration
         /// <param name="searchId"> The search id to be purchased. </param>
         /// <param name="cancellationToken"> The cancellation token to use. </param>
         /// <returns> A <see cref="SearchResult"/>. </returns>
-        public virtual Operation<SearchResult> StartPurchasePhoneNumber(string searchId, CancellationToken cancellationToken = default)
+        public virtual Operation<SearchResult> StartPurchasePhoneNumbers(string searchId, CancellationToken cancellationToken = default)
         {
             throw new NotImplementedException();
         }
