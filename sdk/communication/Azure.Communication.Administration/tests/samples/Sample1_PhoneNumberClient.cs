@@ -87,23 +87,24 @@ namespace Azure.Communication.Administration.Tests.samples
 
             string phoneNumber = "PHONE_NUMBER";
             var releasePhoneNumberOperation = await phoneNumberClient.StartReleasePhoneNumberAsync(phoneNumber);
+            Operation<PhoneNumberRelease> operation = new Operation<PhoneNumberRelease>(releasePhoneNumberOperation.Id);
             await releasePhoneNumberOperation.WaitForCompletionAsync().ConfigureAwait(false);
+
 
             Console.WriteLine("Release succeeded for phone number: " + phoneNumber);
 
         }
-        public void ListAllAcquiredPhoneNumbers()
+        public void ListPhoneNumbers()
         {
             string connectionString = "CONNECTION_STRING";
             PhoneNumberClient phoneNumberClient = new PhoneNumberClient(connectionString);
 
-            AcquiredPhoneNumber[] acquiredPhoneNumbers = phoneNumberClient.ListAcquiredPhoneNumbers().ToArray();
+            AcquiredPhoneNumber[] acquiredPhoneNumbers = phoneNumberClient.ListPhoneNumbers().ToArray();
 
             foreach (AcquiredPhoneNumber acquiredPhoneNumber in acquiredPhoneNumbers)
             {
                 Console.WriteLine("Phone number: " + acquiredPhoneNumber.PhoneNumber);
                 Console.WriteLine("Purchase date: " + acquiredPhoneNumber.PurchaseDate.ToString());
-
             }
         }
     }

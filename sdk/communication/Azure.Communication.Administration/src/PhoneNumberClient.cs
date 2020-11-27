@@ -143,18 +143,18 @@ namespace Azure.Communication.Administration
             throw new NotImplementedException();
         }
 
-        /// <summary> Lists all the acquired phone numbers. </summary>
+        /// <summary> Lists the acquired phone numbers. </summary>
         /// <param name="cancellationToken"> The cancellation token to use. </param>
         /// <returns> A <see cref="AsyncPageable{AcquiredPhoneNumbers}"/>. </returns>
-        public virtual AsyncPageable<AcquiredPhoneNumber> ListAcquiredPhoneNumbersAsync(CancellationToken cancellationToken = default)
+        public virtual AsyncPageable<AcquiredPhoneNumber> ListPhoneNumbersAsync(CancellationToken cancellationToken = default)
         {
             throw new NotImplementedException();
         }
 
-        /// <summary> Lists all the acquired phone numbers. </summary>
+        /// <summary> Lists the acquired phone numbers. </summary>
         /// <param name="cancellationToken"> The cancellation token to use. </param>
         /// <returns> A <see cref="Pageable{AcquiredPhoneNumber}"/>. </returns>
-        public virtual Pageable<AcquiredPhoneNumber> ListAcquiredPhoneNumbers(CancellationToken cancellationToken = default)
+        public virtual Pageable<AcquiredPhoneNumber> ListPhoneNumbers(CancellationToken cancellationToken = default)
         {
             throw new NotImplementedException();
         }
