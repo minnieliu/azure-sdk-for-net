@@ -49,23 +49,23 @@ namespace Azure.Communication.Administration
             throw new NotImplementedException();
         }
 
-        /// <summary> Starts a phone number search. </summary>
+        /// <summary> Starts a phone number search for available numbers. </summary>
         /// <param name="countryCode"> Country code for the phone number search </param>
         /// <param name="searchRequest"> Defines the search options. </param>
         /// <param name="cancellationToken"> The cancellation token to use. </param>
         /// <returns> A <see cref="Operation{SearchResult}"/>. </returns>
-        public virtual async Task<Operation<SearchResult>> StartSearchPhoneNumbersAsync(string countryCode, SearchRequest searchRequest, CancellationToken cancellationToken = default)
+        public virtual async Task<Operation<SearchResult>> StartSearchAvailablePhoneNumbersAsync(string countryCode, SearchRequest searchRequest, CancellationToken cancellationToken = default)
         {
             await Task.Yield();
             throw new NotImplementedException();
         }
 
-        /// <summary> Starts a phone number search. </summary>
+        /// <summary> Starts a phone number search for available numbers. </summary>
         /// <param name="countryCode"> Country code for the phone number search </param>
         /// <param name="searchRequest"> Defines the search options. </param>
         /// <param name="cancellationToken"> The cancellation token to use. </param>
         /// <returns> A <see cref="Operation{SearchResult}"/>. </returns>
-        public virtual Operation<SearchResult> StartSearchPhoneNumbers(string countryCode, SearchRequest searchRequest, CancellationToken cancellationToken = default)
+        public virtual Operation<SearchResult> StartSearchAvailablePhoneNumbers(string countryCode, SearchRequest searchRequest, CancellationToken cancellationToken = default)
         {
             throw new NotImplementedException();
         }
@@ -163,7 +163,7 @@ namespace Azure.Communication.Administration
         /// <param name="phoneNumber"> The phone number to get. </param>
         /// <param name="cancellationToken"> The cancellation token to use. </param>
         /// <returns> A <see cref="Response{AcquiredPhoneNumber}"/>. </returns>
-        public virtual Task<Response<AcquiredPhoneNumber>> GetAcquiredPhoneNumberAsync(string phoneNumber, CancellationToken cancellationToken = default)
+        public virtual Task<Response<AcquiredPhoneNumber>> GetPhoneNumberAsync(string phoneNumber, CancellationToken cancellationToken = default)
         {
             throw new NotImplementedException();
         }
@@ -172,7 +172,7 @@ namespace Azure.Communication.Administration
         /// <param name="phoneNumber"> The phone number to get. </param>
         /// <param name="cancellationToken"> The cancellation token to use. </param>
         /// <returns> A <see cref="Response{AcquiredPhoneNumber}"/>. </returns>
-        public virtual Response<AcquiredPhoneNumber> GetAcquiredPhoneNumber(string phoneNumber, CancellationToken cancellationToken = default)
+        public virtual Response<AcquiredPhoneNumber> GetPhoneNumber(string phoneNumber, CancellationToken cancellationToken = default)
         {
             throw new NotImplementedException();
         }

@@ -14,18 +14,18 @@ namespace Azure.Communication.Administration.Tests.samples
             string connectionString = "CONNECTION_STRING";
             PhoneNumberClient phoneNumberClient = new PhoneNumberClient(connectionString);
 
-            CapabilitiesRequest capabilitiesRequest = new CapabilitiesRequest();
-            capabilitiesRequest.Sms = CapabilityValue.Outbound;
-            capabilitiesRequest.Calling = CapabilityValue.InboundOutbound;
-
             SearchRequest searchRequest = new SearchRequest(
                 PhoneNumberType.Geographic,
                 AssignmentType.Application,
-                capabilitiesRequest,
-                "425",
-                2);
+                new CapabilitiesRequest()
+                {
+                    Sms = CapabilityValue.Outbound,
+                    Calling = CapabilityValue.InboundOutbound,
+                },
+                areaCode: "425",
+                quantity: 2);
 
-            var searchPhoneNumberOperation = await phoneNumberClient.StartSearchPhoneNumbersAsync("US", searchRequest);
+            var searchPhoneNumberOperation = await phoneNumberClient.StartSearchAvailablePhoneNumbersAsync("US", searchRequest);
             await searchPhoneNumberOperation.WaitForCompletionAsync().ConfigureAwait(false);
             SearchResult searchResult = searchPhoneNumberOperation.Value;
 
@@ -61,17 +61,14 @@ namespace Azure.Communication.Administration.Tests.samples
             string connectionString = "CONNECTION_STRING";
             PhoneNumberClient phoneNumberClient = new PhoneNumberClient(connectionString);
 
-            string phoneNumber = "PHONE_NUMBER";
-
-            CapabilitiesRequest capabilitiesRequest = new CapabilitiesRequest();
-            capabilitiesRequest.Sms = CapabilityValue.InboundOutbound;
-
-            AcquiredPhoneNumberUpdate acquiredPhoneNumberUpdate = new AcquiredPhoneNumberUpdate();
-            acquiredPhoneNumberUpdate.ApplicationId = "1dcb5bde-f5f5-4195-a1c1-43f157688769";
-            acquiredPhoneNumberUpdate.CallbackUrl = "https://contoso.com/webhooks/phone";
-            acquiredPhoneNumberUpdate.Capabilities = capabilitiesRequest;
-
-            var updatePhoneNumberOperation = await phoneNumberClient.StartUpdatePhoneNumberAsync(phoneNumber, acquiredPhoneNumberUpdate);
+            var updatePhoneNumberOperation = await phoneNumberClient.StartUpdatePhoneNumberAsync(
+                "PHONE_NUMBER",
+                new AcquiredPhoneNumberUpdate()
+                {
+                    ApplicationId = "1dcb5bde-f5f5-4195-a1c1-43f157688769",
+                    CallbackUrl = "https://contoso.com/webhooks/phone",
+                    Capabilities = new CapabilitiesRequest() { Sms = CapabilityValue.InboundOutbound },
+                });
             await updatePhoneNumberOperation.WaitForCompletionAsync().ConfigureAwait(false);
             AcquiredPhoneNumber acquiredPhoneNumber = updatePhoneNumberOperation.Value;
 
