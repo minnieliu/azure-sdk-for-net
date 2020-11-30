@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 using Azure.Communication.Administration.Models;
 using Azure.Communication.Chat;
@@ -12,11 +13,13 @@ namespace Azure.Communication.Administration.Tests.samples
 {
     public partial class Sample1_Authentication
     {
+        private const string SampleToken = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJleHAiOjMyNTAzNjgwMDAwfQ.9i7FNNHHJT8cOzo-yrAUJyBSfJ-tPPk2emcHavOEpWc";
+
         public async Task CreateCommunicationUserIssueToken()
         {
-            string connectionString = "<connectionString>";
-
+            string connectionString = "CONNECTION_STRING";
             CommunicationIdentityClient communicationIdentityClient = new CommunicationIdentityClient(connectionString);
+
             Response<CommunicationUser> communicationUser = await communicationIdentityClient.CreateUserAsync();
             CommunicationUserToken communicationUserToken = await communicationIdentityClient.IssueTokenAsync(
                 communicationUser: communicationUser.Value,
@@ -26,9 +29,10 @@ namespace Azure.Communication.Administration.Tests.samples
             Console.WriteLine("Communication User Issued Token Value: " + communicationUserToken.Token);
         }
 
-        public async Task CreateChatClient()
+        public async Task CreateChatClientWithStringToken()
         {
-            string connectionString = "<connectionString>";
+            string connectionString = "CONNECTION_STRING";
+            string endpoint = "ENDPOINT";
 
             CommunicationIdentityClient communicationIdentityClient = new CommunicationIdentityClient(connectionString);
             Response<CommunicationUser> communicationUser = await communicationIdentityClient.CreateUserAsync();
@@ -37,7 +41,6 @@ namespace Azure.Communication.Administration.Tests.samples
                 scopes: new[] { CommunicationTokenScope.Chat });
 
             string userToken = communicationUserToken.Token;
-            string endpoint = "<endpoint>";
 
             ChatClient chatClient = new ChatClient(
                 new Uri(endpoint),
@@ -45,6 +48,25 @@ namespace Azure.Communication.Administration.Tests.samples
 
             Console.WriteLine("Chat Client successfully instantiated");
         }
+
+        public async Task CreateChatClientWithTokenFromCallbackProactiveRefreshing()
+        {
+            string endpoint = "ENDPOINT";
+
+            using var userCredential = new CommunicationUserCredential(
+               refreshProactively: true, // Indicates if the token should be proactively refreshed in the background or only on-demand
+               tokenRefresher: cancellationToken => FetchTokenForUserFromMyServer("bob@contoso.com", cancellationToken),
+               asyncTokenRefresher: cancellationToken => FetchTokenForUserFromMyServerAsync("bob@contoso.com", cancellationToken));
+            await userCredential.GetTokenAsync();
+
+            ChatClient chatClient = new ChatClient(
+              new Uri(endpoint),
+              userCredential);
+        }
+
+        private static string FetchTokenForUserFromMyServer(string userId, CancellationToken cancellationToken) => SampleToken;
+
+        private static ValueTask<string> FetchTokenForUserFromMyServerAsync(string userId, CancellationToken cancellationToken) => new ValueTask<string>(SampleToken);
 
         public async Task ListChatParticipants()
         {
@@ -68,9 +90,9 @@ namespace Azure.Communication.Administration.Tests.samples
             ChatThreadClient chatThreadClient = await chatClient.CreateChatThreadAsync(
                 topic: "Hello world!",
                 members: new[] {
-                    new ChatThreadMember(new CommunicationUser(communicationUserToken1.User.Id)) { DisplayName ="display name member 1"},
-                    new ChatThreadMember(new CommunicationUser(communicationUserToken2.User.Id)) { DisplayName ="display name member 2"},
-                    new ChatThreadMember(new CommunicationUser(communicationUserToken3.User.Id)) { DisplayName ="display name member 3"}
+                    new ChatThreadMember(communicationUserToken1.User) { DisplayName ="Bob"},
+                    new ChatThreadMember(communicationUserToken2.User) { DisplayName ="Mary"},
+                    new ChatThreadMember(communicationUserToken3.User) { DisplayName ="Sarah"}
                 });
 
             AsyncPageable<ChatThreadMember> allMembers = chatThreadClient.GetMembersAsync();
