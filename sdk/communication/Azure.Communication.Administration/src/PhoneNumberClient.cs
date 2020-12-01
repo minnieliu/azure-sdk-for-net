@@ -97,60 +97,6 @@ namespace Azure.Communication.Administration
             throw new NotImplementedException();
         }
 
-        /// <summary> Gets phone number search results. </summary>
-        /// <param name="searchId"> The search id to be purchased. </param>
-        /// <param name="cancellationToken"> The cancellation token to use. </param>
-        /// <returns> A <see cref="Response{SearchResult}"/>. </returns>
-        public virtual Task<Response<SearchResult>> GetSearchResultsAsync(string searchId, CancellationToken cancellationToken = default)
-        {
-            throw new NotImplementedException();
-        }
-
-        /// <summary> Gets phone number search results. </summary>
-        /// <param name="searchId"> The search id to be purchased. </param>
-        /// <param name="cancellationToken"> The cancellation token to use. </param>
-        /// <returns> A <see cref="Response{SearchResult}"/>. </returns>
-        public virtual Response<SearchResult> GetSearchResults(string searchId, CancellationToken cancellationToken = default)
-        {
-            throw new NotImplementedException();
-        }
-
-        /// <summary> Gets the operation. </summary>
-        /// <param name="operationId"> The operation id to get. </param>
-        /// <param name="cancellationToken"> The cancellation token to use. </param>
-        /// <returns> A <see cref="Response{PhoneNumberOperation}"/>. </returns>
-        public virtual Task<Response<PhoneNumberOperation>> GetPhoneNumberOperationAsync(string operationId, CancellationToken cancellationToken = default)
-        {
-            throw new NotImplementedException();
-        }
-
-        /// <summary> Gets the operation. </summary>
-        /// <param name="operationId"> The operation id to get. </param>
-        /// <param name="cancellationToken"> The cancellation token to use. </param>
-        /// <returns> A <see cref="Response{PhoneNumberOperation}"/>. </returns>
-        public virtual Response<PhoneNumberOperation> GetPhoneNumberOperation(string operationId, CancellationToken cancellationToken = default)
-        {
-            throw new NotImplementedException();
-        }
-
-        /// <summary> Cancels the operation. </summary>
-        /// <param name="operationId"> The operation id to cancel. </param>
-        /// <param name="cancellationToken"> The cancellation token to use. </param>
-        /// <returns> A <see cref="Response"/>. </returns>
-        public virtual Task<Response> CancelPhoneNumberOperationAsync(string operationId, CancellationToken cancellationToken = default)
-        {
-            throw new NotImplementedException();
-        }
-
-        /// <summary> Cancels the operation. </summary>
-        /// <param name="operationId"> The operation id to cancel. </param>
-        /// <param name="cancellationToken"> The cancellation token to use. </param>
-        /// <returns> A <see cref="Response"/>. </returns>
-        public virtual Response CancelPhoneNumberOperation(string operationId, CancellationToken cancellationToken = default)
-        {
-            throw new NotImplementedException();
-        }
-
         /// <summary> Lists the acquired phone numbers. </summary>
         /// <param name="cancellationToken"> The cancellation token to use. </param>
         /// <returns> A <see cref="AsyncPageable{AcquiredPhoneNumbers}"/>. </returns>
