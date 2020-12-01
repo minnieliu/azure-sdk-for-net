@@ -14,18 +14,17 @@ namespace Azure.Communication.Administration.Tests.samples
             string connectionString = "CONNECTION_STRING";
             PhoneNumberClient phoneNumberClient = new PhoneNumberClient(connectionString);
 
-            SearchRequest searchRequest = new SearchRequest(
-                PhoneNumberType.Geographic,
-                AssignmentType.Application,
-                new CapabilitiesRequest()
+            var searchPhoneNumberOperation = await phoneNumberClient.StartSearchAvailablePhoneNumbersAsync(
+                countryCode: "US",
+                numberType: PhoneNumberType.Geographic,
+                assignmentType: AssignmentType.Application,
+                capabilities: new CapabilitiesRequest()
                 {
                     Sms = CapabilityValue.Outbound,
                     Calling = CapabilityValue.InboundOutbound,
                 },
                 areaCode: "425",
                 quantity: 2);
-
-            var searchPhoneNumberOperation = await phoneNumberClient.StartSearchAvailablePhoneNumbersAsync("US", searchRequest);
             await searchPhoneNumberOperation.WaitForCompletionAsync().ConfigureAwait(false);
             SearchResult searchResult = searchPhoneNumberOperation.Value;
 
@@ -63,12 +62,10 @@ namespace Azure.Communication.Administration.Tests.samples
 
             var updatePhoneNumberOperation = await phoneNumberClient.StartUpdatePhoneNumberAsync(
                 "PHONE_NUMBER",
-                new AcquiredPhoneNumberUpdate()
-                {
-                    ApplicationId = "1dcb5bde-f5f5-4195-a1c1-43f157688769",
-                    CallbackUrl = "https://contoso.com/webhooks/phone",
-                    Capabilities = new CapabilitiesRequest() { Sms = CapabilityValue.InboundOutbound },
-                });
+                callbackurl: "https://contoso.com/webhooks/phone",
+                applicationId: "1dcb5bde-f5f5-4195-a1c1-43f157688769",
+                capabilities: new CapabilitiesRequest() { Sms = CapabilityValue.InboundOutbound }
+            );
             await updatePhoneNumberOperation.WaitForCompletionAsync().ConfigureAwait(false);
             AcquiredPhoneNumber acquiredPhoneNumber = updatePhoneNumberOperation.Value;
 

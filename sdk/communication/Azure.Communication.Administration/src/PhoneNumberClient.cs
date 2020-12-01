@@ -51,10 +51,14 @@ namespace Azure.Communication.Administration
 
         /// <summary> Starts a phone number search for available numbers. </summary>
         /// <param name="countryCode"> Country code for the phone number search </param>
-        /// <param name="searchRequest"> Defines the search options. </param>
+        /// <param name="numberType"> The phone number type. </param>
+        /// <param name="assignmentType"> The phone number&apos;s assignment type. </param>
+        /// <param name="capabilities"> The phone number&apos;s capabilities. </param>
+        /// <param name="areaCode"> The desired area code. </param>
+        /// <param name="quantity"> The desired quantity of phone numbers. </param>
         /// <param name="cancellationToken"> The cancellation token to use. </param>
         /// <returns> A <see cref="Operation{SearchResult}"/>. </returns>
-        public virtual async Task<Operation<SearchResult>> StartSearchAvailablePhoneNumbersAsync(string countryCode, SearchRequest searchRequest, CancellationToken cancellationToken = default)
+        public virtual async Task<Operation<SearchResult>> StartSearchAvailablePhoneNumbersAsync(string countryCode, PhoneNumberType numberType, AssignmentType assignmentType, CapabilitiesRequest capabilities, string areaCode, int? quantity, CancellationToken cancellationToken = default)
         {
             await Task.Yield();
             throw new NotImplementedException();
@@ -62,10 +66,14 @@ namespace Azure.Communication.Administration
 
         /// <summary> Starts a phone number search for available numbers. </summary>
         /// <param name="countryCode"> Country code for the phone number search </param>
-        /// <param name="searchRequest"> Defines the search options. </param>
+        /// <param name="numberType"> The phone number type. </param>
+        /// <param name="assignmentType"> The phone number's assignment type. </param>
+        /// <param name="capabilities"> The phone number's capabilities. </param>
+        /// <param name="areaCode"> The desired area code. </param>
+        /// <param name="quantity"> The desired quantity of phone numbers. </param>
         /// <param name="cancellationToken"> The cancellation token to use. </param>
         /// <returns> A <see cref="Operation{SearchResult}"/>. </returns>
-        public virtual Operation<SearchResult> StartSearchAvailablePhoneNumbers(string countryCode, SearchRequest searchRequest, CancellationToken cancellationToken = default)
+        public virtual Operation<SearchResult> StartSearchAvailablePhoneNumbers(string countryCode, PhoneNumberType numberType, AssignmentType assignmentType, CapabilitiesRequest capabilities, string areaCode, int? quantity, CancellationToken cancellationToken = default)
         {
             throw new NotImplementedException();
         }
@@ -178,22 +186,26 @@ namespace Azure.Communication.Administration
         }
 
         /// <summary> Starts an update for the given phone number. </summary>
-        /// <param name="phoneNumber"> The phone number in the release request. </param>
-        /// <param name="update"> The properties of a phone number to be udpated. </param>
+        /// <param name="phoneNumber"> The phone number to update. </param>
+        /// <param name="callbackurl"> The updatd callback url</param>
+        /// <param name="applicationId"> The updated application id</param>
+        /// <param name="capabilities"> The updated capabilities</param>
         /// <param name="cancellationToken"> The cancellation token to use. </param>
         /// <returns> A <see cref="Operation{AcquiredPhoneNumber}"/>. </returns>
-        public virtual async Task<Operation<AcquiredPhoneNumber>> StartUpdatePhoneNumberAsync(string phoneNumber, AcquiredPhoneNumberUpdate update, CancellationToken cancellationToken = default)
+        public virtual async Task<Operation<AcquiredPhoneNumber>> StartUpdatePhoneNumberAsync(string phoneNumber, string callbackurl, string applicationId, CapabilitiesRequest capabilities, CancellationToken cancellationToken = default)
         {
             await Task.Yield();
             throw new NotImplementedException();
         }
 
         /// <summary> Starts a release for the given phone number. </summary>
-        /// <param name="phoneNumber"> The phone number in the release request. </param>
-        /// <param name="update"> The properties of a phone number to be udpated. </param>
+        /// <param name="phoneNumber"> The phone number to update. </param>
+        /// <param name="callbackurl"> The updatd callback url</param>
+        /// <param name="applicationId"> The updated application id</param>
+        /// <param name="capabilities"> The updated capabilities</param>
         /// <param name="cancellationToken"> The cancellation token to use. </param>
         /// <returns> A <see cref="Operation{AcquiredPhoneNumber}"/>. </returns>
-        public virtual Operation<AcquiredPhoneNumber> StartUpdatePhoneNumber(string phoneNumber, AcquiredPhoneNumberUpdate update, CancellationToken cancellationToken = default)
+        public virtual Operation<AcquiredPhoneNumber> StartUpdatePhoneNumber(string phoneNumber, string callbackurl, string applicationId, CapabilitiesRequest capabilities, CancellationToken cancellationToken = default)
         {
             throw new NotImplementedException();
         }
